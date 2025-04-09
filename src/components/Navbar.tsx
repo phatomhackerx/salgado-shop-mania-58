@@ -1,240 +1,226 @@
 
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { 
+  ShoppingCart, 
+  Menu, 
+  X, 
+  Search,
+  Calendar
+} from "lucide-react";
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetTrigger,
+  SheetClose
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Search, ShoppingCart, Menu, CalendarClock } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/hooks/use-cart";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Navbar = () => {
-  const navigate = useNavigate();
   const { totalItems } = useCart();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
+  const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const location = useLocation();
+  
+  // Monitor scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+  
+  // Reset search when changing route
+  useEffect(() => {
+    setSearchQuery("");
+  }, [location]);
+  
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/produtos?q=${encodeURIComponent(searchQuery)}`);
-    }
+    // Search implementation would go here
+    console.log("Search for:", searchQuery);
   };
-
+  
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="container flex h-16 items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <span className="font-bold text-xl">Salgado Shop Mania</span>
-        </Link>
-
-        {/* Desktop Navigation */}
-        {!isMobile && (
-          <NavigationMenu className="hidden md:flex">
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <Link to="/produtos">
-                  <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50">
-                    Produtos
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/categorias">
-                  <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50">
-                    Categorias
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/promocoes">
-                  <NavigationMenuLink className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50">
-                    Promoções
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Eventos</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                    <li className="row-span-3">
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/combos"
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/50 to-primary p-6 no-underline outline-none focus:shadow-md"
-                        >
-                          <div className="mt-4 mb-2 text-lg font-medium text-white">
-                            Combos para Festas
-                          </div>
-                          <p className="text-sm leading-tight text-white/90">
-                            Pacotes especiais para seus eventos com preços promocionais.
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <li>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/agendamento"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="flex items-center text-sm font-medium leading-none">
-                            <CalendarClock className="mr-2 h-4 w-4" />
-                            Agendamento
-                          </div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Pedidos grandes com entrega programada.
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <li>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/produtos"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none">Corporativo</div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Soluções para eventos empresariais.
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <li>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/categorias"
-                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                        >
-                          <div className="text-sm font-medium leading-none">Produtos Premium</div>
-                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                            Salgados gourmet para ocasiões especiais.
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-        )}
-
-        {/* Search, Cart and Mobile Menu */}
-        <div className="flex items-center gap-2">
-          {/* Search Form */}
-          <form onSubmit={handleSearch} className="relative hidden md:block">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Pesquisar..."
-              className="w-[250px] pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </form>
-
-          {/* Cart Button */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="relative"
-            onClick={() => navigate("/carrinho")}
-          >
-            <ShoppingCart className="h-5 w-5" />
-            {totalItems > 0 && (
-              <span className="absolute -top-2 -right-2 bg-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                {totalItems}
-              </span>
-            )}
-          </Button>
-
-          {/* Mobile Menu */}
-          {isMobile && (
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left">
-                <div className="py-4 grid gap-4">
-                  <form onSubmit={handleSearch} className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="search"
-                      placeholder="Pesquisar..."
-                      className="w-full pl-8"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </form>
-                  <nav className="grid gap-2">
-                    <Link
-                      to="/"
-                      className="flex items-center gap-2 px-3 py-2 text-lg font-medium rounded-md hover:bg-accent"
-                    >
-                      Início
-                    </Link>
-                    <Link
-                      to="/produtos"
-                      className="flex items-center gap-2 px-3 py-2 text-lg font-medium rounded-md hover:bg-accent"
-                    >
-                      Produtos
-                    </Link>
-                    <Link
-                      to="/categorias"
-                      className="flex items-center gap-2 px-3 py-2 text-lg font-medium rounded-md hover:bg-accent"
-                    >
-                      Categorias
-                    </Link>
-                    <Link
-                      to="/promocoes"
-                      className="flex items-center gap-2 px-3 py-2 text-lg font-medium rounded-md hover:bg-accent"
-                    >
-                      Promoções
-                    </Link>
-                    <Link
-                      to="/combos"
-                      className="flex items-center gap-2 px-3 py-2 text-lg font-medium rounded-md hover:bg-accent"
-                    >
-                      <span className="font-medium">Combos para Festas</span>
-                    </Link>
-                    <Link
-                      to="/agendamento"
-                      className="flex items-center gap-2 px-3 py-2 text-lg font-medium rounded-md hover:bg-accent"
-                    >
-                      <CalendarClock className="h-5 w-5" />
-                      <span className="font-medium">Agendamento</span>
-                    </Link>
-                    <Link
-                      to="/carrinho"
-                      className="flex items-center gap-2 px-3 py-2 text-lg font-medium rounded-md hover:bg-accent"
-                    >
-                      <ShoppingCart className="h-5 w-5" />
-                      <span className="font-medium">Carrinho</span>
-                      {totalItems > 0 && (
-                        <span className="bg-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center ml-auto">
-                          {totalItems}
-                        </span>
-                      )}
-                    </Link>
-                  </nav>
-                </div>
-              </SheetContent>
-            </Sheet>
+    <header className={`sticky top-0 w-full z-50 transition-all duration-300 ${
+      isScrolled ? "bg-white shadow-md" : "bg-white/80 backdrop-blur-sm"
+    }`}>
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center">
+            <h1 className="text-xl font-bold text-primary tracking-tight">
+              Salgado Shop Mania
+            </h1>
+          </Link>
+          
+          {/* Desktop Navigation */}
+          {!isMobile && (
+            <nav className="hidden md:flex items-center space-x-6">
+              <Link to="/produtos" className="text-gray-600 hover:text-primary">
+                Produtos
+              </Link>
+              <Link to="/categorias" className="text-gray-600 hover:text-primary">
+                Categorias
+              </Link>
+              <Link to="/promocoes" className="text-gray-600 hover:text-primary">
+                Promoções
+              </Link>
+              <Link to="/combos" className="text-gray-600 hover:text-primary">
+                Combos
+              </Link>
+              <Link to="/agendamento" className="text-gray-600 hover:text-primary flex items-center">
+                <Calendar className="mr-1 h-4 w-4" />
+                Agendar
+              </Link>
+            </nav>
           )}
+          
+          {/* Search, Cart and Mobile Menu */}
+          <div className="flex items-center space-x-3">
+            {/* Search */}
+            <form 
+              onSubmit={handleSearch} 
+              className="hidden md:flex items-center relative w-60"
+            >
+              <Input
+                type="search"
+                placeholder="Buscar salgados..."
+                className="pr-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search 
+                className="absolute right-2 h-4 w-4 text-gray-500" 
+                onClick={() => handleSearch}
+              />
+            </form>
+            
+            {/* Cart */}
+            <Link to="/carrinho" className="relative">
+              <ShoppingCart className="h-6 w-6 text-gray-700 hover:text-primary transition-colors" />
+              {totalItems > 0 && (
+                <Badge className="absolute -top-2 -right-2 px-1.5 py-0.5 min-w-[1.5rem] text-center">
+                  {totalItems}
+                </Badge>
+              )}
+            </Link>
+            
+            {/* Mobile Menu */}
+            {isMobile && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="md:hidden">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[85%]">
+                  <div className="flex flex-col h-full">
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-lg font-semibold">Menu</h2>
+                      <SheetClose className="rounded-full p-1 hover:bg-gray-100">
+                        <X className="h-5 w-5" />
+                      </SheetClose>
+                    </div>
+                    
+                    {/* Mobile Search */}
+                    <form 
+                      onSubmit={handleSearch} 
+                      className="flex items-center relative mb-6"
+                    >
+                      <Input
+                        type="search"
+                        placeholder="Buscar salgados..."
+                        className="pr-8"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                      <Button 
+                        type="submit" 
+                        variant="ghost" 
+                        size="icon" 
+                        className="absolute right-0"
+                      >
+                        <Search className="h-4 w-4 text-gray-500" />
+                      </Button>
+                    </form>
+                    
+                    {/* Mobile Nav Links */}
+                    <nav className="flex flex-col space-y-4">
+                      <SheetClose asChild>
+                        <Link 
+                          to="/" 
+                          className="flex items-center p-2 rounded-lg hover:bg-gray-100"
+                        >
+                          Início
+                        </Link>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Link 
+                          to="/produtos" 
+                          className="flex items-center p-2 rounded-lg hover:bg-gray-100"
+                        >
+                          Produtos
+                        </Link>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Link 
+                          to="/categorias" 
+                          className="flex items-center p-2 rounded-lg hover:bg-gray-100"
+                        >
+                          Categorias
+                        </Link>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Link 
+                          to="/promocoes" 
+                          className="flex items-center p-2 rounded-lg hover:bg-gray-100"
+                        >
+                          Promoções
+                        </Link>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Link 
+                          to="/combos" 
+                          className="flex items-center p-2 rounded-lg hover:bg-gray-100"
+                        >
+                          Combos
+                        </Link>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Link 
+                          to="/agendamento" 
+                          className="flex items-center p-2 rounded-lg hover:bg-gray-100"
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          Agendar Entrega
+                        </Link>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Link 
+                          to="/carrinho" 
+                          className="flex items-center p-2 rounded-lg hover:bg-gray-100"
+                        >
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          Carrinho
+                          {totalItems > 0 && (
+                            <Badge className="ml-2">{totalItems}</Badge>
+                          )}
+                        </Link>
+                      </SheetClose>
+                    </nav>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
+          </div>
         </div>
       </div>
     </header>
