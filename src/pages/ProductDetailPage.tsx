@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -12,6 +11,7 @@ import { products } from "@/data/mock-data";
 import { useCart } from "@/hooks/use-cart";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
+import { ProductCard } from "@/components/ProductCard";
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
