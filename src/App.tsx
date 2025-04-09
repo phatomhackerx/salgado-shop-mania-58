@@ -12,6 +12,8 @@ import CartPage from "./pages/CartPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import CategoryDetailPage from "./pages/CategoryDetailPage";
 import PromotionsPage from "./pages/PromotionsPage";
+import SchedulePage from "./pages/SchedulePage";
+import CombosPage from "./pages/CombosPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/categorias/:slug" element={<CategoryDetailPage />} />
             <Route path="/promocoes" element={<PromotionsPage />} />
             <Route path="/carrinho" element={<CartPage />} />
+            <Route path="/agendamento" element={<SchedulePage />} />
+            <Route path="/combos" element={<CombosPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

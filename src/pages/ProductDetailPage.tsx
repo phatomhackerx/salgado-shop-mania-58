@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -9,15 +10,18 @@ import {
 } from "@/components/ui/card";
 import { products } from "@/data/mock-data";
 import { useCart } from "@/hooks/use-cart";
-import { Minus, Plus, ShoppingCart } from "lucide-react";
+import { Minus, Plus, ShoppingCart, CalendarClock } from "lucide-react";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
 import { ProductCard } from "@/components/ProductCard";
+import { ScheduleDelivery } from "@/components/ScheduleDelivery";
+import { toast } from "@/components/ui/use-toast";
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
+  const [showScheduleOption, setShowScheduleOption] = useState(false);
   
   const product = products.find((p) => p.id === Number(id));
   
@@ -25,6 +29,11 @@ const ProductDetailPage = () => {
   const relatedProducts = product
     ? products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 5)
     : [];
+  
+  useEffect(() => {
+    // Show schedule option if quantity >= 100
+    setShowScheduleOption(quantity >= 100);
+  }, [quantity]);
   
   if (!product) {
     return (
@@ -50,6 +59,31 @@ const ProductDetailPage = () => {
   
   const handleAddToCart = () => {
     addToCart(product, quantity);
+  };
+
+  const handleScheduleDelivery = (date: Date, time: string, note: string) => {
+    // Add to cart with scheduled delivery info
+    addToCart(product, quantity);
+    
+    // Store schedule information (in a real app, this would be stored in the server)
+    const scheduleInfo = {
+      productId: product.id,
+      quantity,
+      date,
+      time,
+      note
+    };
+    
+    console.log("Scheduled delivery:", scheduleInfo);
+    
+    toast({
+      title: "Entrega agendada!",
+      description: `Seu pedido foi agendado para ${date.toLocaleDateString()} às ${time}.`,
+    });
+  };
+
+  const handleBulkOrderClick = () => {
+    navigate("/agendamento");
   };
 
   return (
@@ -110,6 +144,21 @@ const ProductDetailPage = () => {
               </CardContent>
             </Card>
             
+            {/* Scheduling notice for large quantities */}
+            {showScheduleOption && (
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-6">
+                <div className="flex items-start">
+                  <CalendarClock className="h-6 w-6 text-primary mr-2 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="font-medium">Agendamento disponível</h3>
+                    <p className="text-sm text-gray-600">
+                      Para pedidos de 100 ou mais unidades, oferecemos entrega agendada.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Add to cart button */}
             <Button 
               size="lg" 
@@ -118,6 +167,25 @@ const ProductDetailPage = () => {
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
               Adicionar ao Carrinho
+            </Button>
+            
+            {/* Schedule delivery option */}
+            {showScheduleOption && (
+              <ScheduleDelivery 
+                onSchedule={handleScheduleDelivery}
+                minimumQuantity={100}
+                currentQuantity={quantity}
+              />
+            )}
+            
+            {/* Bulk order button */}
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={handleBulkOrderClick}
+            >
+              <CalendarClock className="mr-2 h-5 w-5" />
+              Ver Combos para Eventos
             </Button>
           </div>
         </div>

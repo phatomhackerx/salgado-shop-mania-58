@@ -11,19 +11,28 @@ export type Product = {
   description: string;
 };
 
+type ScheduleInfo = {
+  date: Date;
+  time: string;
+  note?: string;
+};
+
 type CartItem = {
   product: Product;
   quantity: number;
+  scheduleInfo?: ScheduleInfo;
 };
 
 type CartContextType = {
   cartItems: CartItem[];
-  addToCart: (product: Product, quantity?: number) => void;
+  addToCart: (product: Product, quantity?: number, scheduleInfo?: ScheduleInfo) => void;
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
+  updateScheduleInfo: (productId: number, scheduleInfo: ScheduleInfo) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
+  scheduledItems: CartItem[];
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -32,6 +41,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [scheduledItems, setScheduledItems] = useState<CartItem[]>([]);
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -39,14 +49,27 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart);
-        setCartItems(parsedCart);
+        // Convert date strings back to Date objects
+        const processedCart = parsedCart.map((item: CartItem) => {
+          if (item.scheduleInfo && item.scheduleInfo.date) {
+            return {
+              ...item,
+              scheduleInfo: {
+                ...item.scheduleInfo,
+                date: new Date(item.scheduleInfo.date)
+              }
+            };
+          }
+          return item;
+        });
+        setCartItems(processedCart);
       } catch (error) {
         console.error("Failed to parse cart from localStorage", error);
       }
     }
   }, []);
 
-  // Save cart to localStorage whenever it changes
+  // Save cart to localStorage whenever it changes and update totals
   useEffect(() => {
     if (cartItems.length > 0) {
       localStorage.setItem("cart", JSON.stringify(cartItems));
@@ -58,16 +81,25 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     
     setTotalItems(items);
     setTotalPrice(price);
+    
+    // Filter out scheduled items
+    const scheduled = cartItems.filter(item => item.scheduleInfo);
+    setScheduledItems(scheduled);
   }, [cartItems]);
 
-  const addToCart = (product: Product, quantity: number = 1) => {
+  const addToCart = (product: Product, quantity: number = 1, scheduleInfo?: ScheduleInfo) => {
     setCartItems(prevItems => {
       const existingItemIndex = prevItems.findIndex(item => item.product.id === product.id);
       
       if (existingItemIndex >= 0) {
-        // Update quantity of existing item
+        // Update quantity of existing item and possibly add schedule info
         const updatedItems = [...prevItems];
         updatedItems[existingItemIndex].quantity += quantity;
+        
+        // Add or update schedule info if provided
+        if (scheduleInfo) {
+          updatedItems[existingItemIndex].scheduleInfo = scheduleInfo;
+        }
         
         toast({
           title: "Item atualizado",
@@ -82,7 +114,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           description: `${product.name} foi adicionado ao carrinho.`,
         });
         
-        return [...prevItems, { product, quantity }];
+        return [...prevItems, { product, quantity, scheduleInfo }];
       }
     });
   };
@@ -123,6 +155,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  const updateScheduleInfo = (productId: number, scheduleInfo: ScheduleInfo) => {
+    setCartItems(prevItems => 
+      prevItems.map(item => 
+        item.product.id === productId 
+          ? { ...item, scheduleInfo } 
+          : item
+      )
+    );
+    
+    toast({
+      title: "Agendamento atualizado",
+      description: `Entrega agendada para ${scheduleInfo.date.toLocaleDateString()} às ${scheduleInfo.time}.`,
+    });
+  };
+
   const clearCart = () => {
     setCartItems([]);
     localStorage.removeItem("cart");
@@ -139,9 +186,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         addToCart,
         removeFromCart,
         updateQuantity,
+        updateScheduleInfo,
         clearCart,
         totalItems,
         totalPrice,
+        scheduledItems,
       }}
     >
       {children}
