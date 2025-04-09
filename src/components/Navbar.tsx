@@ -6,7 +6,8 @@ import {
   Menu, 
   X, 
   Search,
-  Calendar
+  Calendar,
+  CalendarClock
 } from "lucide-react";
 import { 
   Sheet, 
@@ -14,6 +15,11 @@ import {
   SheetTrigger,
   SheetClose
 } from "@/components/ui/sheet";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,11 +27,12 @@ import { useCart } from "@/hooks/use-cart";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Navbar = () => {
-  const { totalItems } = useCart();
+  const { totalItems, scheduledItems } = useCart();
   const isMobile = useIsMobile();
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
+  const hasScheduledItems = scheduledItems.length > 0;
   
   // Monitor scroll position
   useEffect(() => {
@@ -76,10 +83,67 @@ export const Navbar = () => {
               <Link to="/combos" className="text-gray-600 hover:text-primary">
                 Combos
               </Link>
-              <Link to="/agendamento" className="text-gray-600 hover:text-primary flex items-center">
-                <Calendar className="mr-1 h-4 w-4" />
-                Agendar
-              </Link>
+              
+              {/* Schedule Dropdown */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="text-gray-600 hover:text-primary flex items-center">
+                    <Calendar className="mr-1 h-4 w-4" />
+                    Agendar
+                    {hasScheduledItems && (
+                      <Badge className="ml-1 h-5 w-5 p-0 flex items-center justify-center">
+                        {scheduledItems.length}
+                      </Badge>
+                    )}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0">
+                  <div className="p-4 border-b">
+                    <div className="font-medium">Agendamentos</div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {hasScheduledItems 
+                        ? `Você tem ${scheduledItems.length} ${scheduledItems.length === 1 ? 'entrega agendada' : 'entregas agendadas'}`
+                        : 'Você não tem entregas agendadas'}
+                    </p>
+                  </div>
+                  {hasScheduledItems ? (
+                    <div className="max-h-[300px] overflow-auto">
+                      {scheduledItems.slice(0, 3).map((item, index) => (
+                        <div key={index} className="p-3 border-b last:border-b-0 hover:bg-gray-50">
+                          <div className="font-medium truncate">{item.product.name}</div>
+                          <div className="flex justify-between mt-1">
+                            <div className="text-sm text-muted-foreground">
+                              {item.scheduleInfo?.date.toLocaleDateString('pt-BR')}
+                            </div>
+                            <div className="text-sm font-medium text-primary">
+                              {item.scheduleInfo?.time}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {scheduledItems.length > 3 && (
+                        <div className="p-2 text-center text-sm text-primary">
+                          + {scheduledItems.length - 3} mais agendamentos
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center">
+                      <CalendarClock className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">
+                        Faça pedidos de salgados para eventos especiais e ocasiões
+                      </p>
+                    </div>
+                  )}
+                  <div className="p-3 bg-gray-50">
+                    <Link to="/agendamento">
+                      <Button className="w-full" variant="outline">
+                        {hasScheduledItems ? 'Ver Todos Agendamentos' : 'Agendar Entrega'}
+                      </Button>
+                    </Link>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </nav>
           )}
           
@@ -194,15 +258,23 @@ export const Navbar = () => {
                           Combos
                         </Link>
                       </SheetClose>
+
+                      {/* Mobile Schedule Link with Badge */}
                       <SheetClose asChild>
                         <Link 
                           to="/agendamento" 
-                          className="flex items-center p-2 rounded-lg hover:bg-gray-100"
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100"
                         >
-                          <Calendar className="mr-2 h-4 w-4" />
-                          Agendar Entrega
+                          <div className="flex items-center">
+                            <Calendar className="mr-2 h-4 w-4" />
+                            Agendar Entrega
+                          </div>
+                          {hasScheduledItems && (
+                            <Badge>{scheduledItems.length}</Badge>
+                          )}
                         </Link>
                       </SheetClose>
+                      
                       <SheetClose asChild>
                         <Link 
                           to="/carrinho" 

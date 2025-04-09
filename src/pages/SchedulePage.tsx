@@ -3,10 +3,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { ScheduleDelivery } from "@/components/ScheduleDelivery";
+import { ScheduleStatus } from "@/components/ScheduleStatus";
+import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Calendar } from "@/components/ui/calendar";
-import { toast } from "@/components/ui/use-toast";
+import { Calendar, ChevronLeft, Filter, ShoppingBag } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -16,208 +17,81 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { products } from "@/data/mock-data";
-import { cn } from "@/lib/utils";
-import { Clock, Calendar as CalendarIcon, Check, CalendarClock } from "lucide-react";
-
-// Define combos for bulk orders
-const combos = [
-  {
-    id: 1,
-    name: "Festa Pequena",
-    description: "100 salgados sortidos",
-    price: 149.9,
-    quantity: 100,
-  },
-  {
-    id: 2,
-    name: "Festa Média",
-    description: "200 salgados sortidos",
-    price: 279.9,
-    quantity: 200,
-  },
-  {
-    id: 3,
-    name: "Festa Grande",
-    description: "300 salgados sortidos",
-    price: 399.9,
-    quantity: 300,
-  },
-  {
-    id: 4,
-    name: "Evento Corporativo",
-    description: "500 salgados premium",
-    price: 699.9,
-    quantity: 500,
-  },
-];
-
-const formSchema = z.object({
-  combo: z.string({
-    required_error: "Por favor selecione um combo",
-  }),
-  date: z.date({
-    required_error: "Por favor selecione uma data para entrega",
-  }),
-  time: z.string({
-    required_error: "Por favor selecione um horário para entrega",
-  }),
-  name: z.string().min(3, {
-    message: "Nome deve ter pelo menos 3 caracteres",
-  }),
-  phone: z.string().min(10, {
-    message: "Telefone inválido",
-  }),
-  address: z.string().min(5, {
-    message: "Endereço deve ter pelo menos 5 caracteres",
-  }),
-  notes: z.string().optional(),
-});
+import { Checkbox } from "@/components/ui/checkbox";
 
 const SchedulePage = () => {
   const navigate = useNavigate();
-  const [selectedCombo, setSelectedCombo] = useState<number | null>(null);
-  const [currentStep, setCurrentStep] = useState(1);
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      notes: "",
-    },
+  const { cartItems, scheduledItems, totalItems, updateScheduleInfo } = useCart();
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState("upcoming");
+
+  // Filter options
+  const statuses = [
+    { id: "scheduled", label: "Agendado" },
+    { id: "preparing", label: "Em Preparação" },
+    { id: "on-the-way", label: "A Caminho" },
+    { id: "delivered", label: "Entregue" },
+  ];
+
+  // For demo purposes, assign random statuses to scheduled items
+  const getRandomStatus = (index: number) => {
+    const allStatuses = ["scheduled", "preparing", "on-the-way", "delivered"] as const;
+    // Use index to distribute statuses somewhat evenly for the demo
+    return allStatuses[index % allStatuses.length];
+  };
+
+  // Filter scheduled items based on selected status
+  const filteredItems = scheduledItems.filter(item => {
+    if (selectedStatus.length === 0) return true;
+    const itemStatus = getRandomStatus(scheduledItems.indexOf(item)) as string;
+    return selectedStatus.includes(itemStatus);
   });
 
-  // Generate available times (9AM to 6PM in 30-min increments)
-  const availableTimes = [];
-  for (let i = 9; i <= 18; i++) {
-    availableTimes.push(`${i}:00`);
-    if (i < 18) availableTimes.push(`${i}:30`);
-  }
-
-  // Calculate the minimum date (next day)
-  const minDate = new Date();
-  minDate.setDate(minDate.getDate() + 1);
-
-  // Calculate the maximum date (30 days from now)
-  const maxDate = new Date();
-  maxDate.setDate(maxDate.getDate() + 30);
-
-  // Disable weekends
-  const isWeekend = (date: Date) => {
-    const day = date.getDay();
-    return day === 0 || day === 6;
-  };
-
-  // Check if time slot is available (simulated)
-  const isTimeSlotAvailable = (time: string) => {
-    // In a real app, this would check against a database of booked slots
-    const unavailableTimes = ["11:30", "13:00", "15:30", "17:00"];
-    return !unavailableTimes.includes(time);
-  };
-
-  const nextStep = () => {
-    if (currentStep === 1 && !selectedCombo) {
-      toast({
-        title: "Selecione um combo",
-        description: "É necessário selecionar um combo para continuar.",
-        variant: "destructive",
-      });
-      return;
-    }
+  // Group scheduled items by date
+  const groupByDate = (items: typeof scheduledItems) => {
+    const groups: Record<string, typeof scheduledItems> = {};
     
-    if (currentStep === 2) {
-      const date = form.getValues("date");
-      const time = form.getValues("time");
+    items.forEach(item => {
+      if (!item.scheduleInfo?.date) return;
       
-      if (!date) {
-        toast({
-          title: "Selecione uma data",
-          description: "É necessário selecionar uma data para continuar.",
-          variant: "destructive",
-        });
-        return;
+      const dateKey = item.scheduleInfo.date.toISOString().split('T')[0];
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
       }
-      
-      if (!time) {
-        toast({
-          title: "Selecione um horário",
-          description: "É necessário selecionar um horário para continuar.",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-    
-    setCurrentStep(currentStep + 1);
-  };
-
-  const prevStep = () => {
-    setCurrentStep(currentStep - 1);
-  };
-
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-    toast({
-      title: "Agendamento confirmado!",
-      description: `Seu pedido foi agendado para ${values.date.toLocaleDateString()} às ${values.time}`,
+      groups[dateKey].push(item);
     });
     
-    setTimeout(() => {
-      navigate("/");
-    }, 2000);
+    return groups;
   };
 
-  const renderStepIndicator = () => {
-    return (
-      <div className="flex items-center justify-center mb-8">
-        {[1, 2, 3].map((step) => (
-          <div key={step} className="flex items-center">
-            <div 
-              className={`
-                flex items-center justify-center w-10 h-10 rounded-full border-2
-                ${currentStep === step 
-                  ? 'border-primary bg-primary text-primary-foreground' 
-                  : currentStep > step
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-gray-200 text-gray-400'
-                }
-              `}
-            >
-              {currentStep > step ? <Check className="h-5 w-5" /> : step}
-            </div>
-            {step < 3 && (
-              <div 
-                className={`w-16 h-0.5 ${
-                  currentStep > step ? 'bg-primary' : 'bg-gray-200'
-                }`}
-              ></div>
-            )}
-          </div>
-        ))}
-      </div>
+  const groupedItems = groupByDate(filteredItems);
+  
+  // Sort dates
+  const sortedDates = Object.keys(groupedItems).sort((a, b) => {
+    return new Date(a).getTime() - new Date(b).getTime();
+  });
+
+  // Split into upcoming and past
+  const today = new Date().toISOString().split('T')[0];
+  const upcomingDates = sortedDates.filter(date => date >= today);
+  const pastDates = sortedDates.filter(date => date < today);
+
+  const handleStatusToggle = (status: string) => {
+    setSelectedStatus(prev => 
+      prev.includes(status)
+        ? prev.filter(s => s !== status)
+        : [...prev, status]
     );
   };
 
@@ -225,307 +99,225 @@ const SchedulePage = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="mb-4">
+        <div className="mb-6">
           <Button variant="ghost" onClick={() => navigate(-1)} className="text-gray-500">
-            ← Voltar
+            <ChevronLeft className="mr-1 h-4 w-4" />
+            Voltar
           </Button>
         </div>
         
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">Agendamento para Grandes Pedidos</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Para pedidos acima de 100 unidades, oferecemos um serviço especial de agendamento.
-            Escolha um de nossos combos e programe sua entrega com antecedência.
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Agendamentos</h1>
+          <p className="text-gray-600">
+            Gerencie seus pedidos agendados e acompanhe o status de entrega.
           </p>
         </div>
-        
-        {renderStepIndicator()}
-        
-        <div className="max-w-3xl mx-auto">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              
-              {/* Step 1: Choose Combo */}
-              {currentStep === 1 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Escolha seu Combo</CardTitle>
-                    <CardDescription>
-                      Selecione o combo ideal para seu evento
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {combos.map((combo) => (
-                        <div
-                          key={combo.id}
-                          className={cn(
-                            "border rounded-lg p-4 cursor-pointer transition-all relative",
-                            selectedCombo === combo.id
-                              ? "border-primary bg-primary/5"
-                              : "hover:border-gray-400"
-                          )}
-                          onClick={() => {
-                            setSelectedCombo(combo.id);
-                            form.setValue("combo", combo.id.toString());
-                          }}
-                        >
-                          {selectedCombo === combo.id && (
-                            <div className="absolute top-2 right-2 rounded-full bg-primary h-5 w-5 flex items-center justify-center text-primary-foreground">
-                              <Check className="h-3 w-3" />
-                            </div>
-                          )}
-                          <div className="font-medium">{combo.name}</div>
-                          <div className="text-sm text-gray-500 mb-2">{combo.description}</div>
-                          <div className="mt-2 font-bold text-primary">
-                            R$ {combo.price.toFixed(2)}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {combo.quantity} unidades
+
+        {scheduledItems.length > 0 ? (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <div className="flex justify-between items-center">
+                  <TabsList>
+                    <TabsTrigger value="upcoming">Próximas Entregas</TabsTrigger>
+                    <TabsTrigger value="past">Entregas Passadas</TabsTrigger>
+                  </TabsList>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                    className="flex items-center"
+                  >
+                    <Filter className="mr-2 h-4 w-4" />
+                    Filtrar
+                  </Button>
+                </div>
+                
+                <Collapsible
+                  open={isFilterOpen}
+                  onOpenChange={setIsFilterOpen}
+                  className="mt-4"
+                >
+                  <CollapsibleContent className="bg-muted/50 p-4 rounded-md">
+                    <div className="mb-2 font-medium">Filtrar por Status</div>
+                    <div className="flex flex-wrap gap-4">
+                      {statuses.map(status => (
+                        <div key={status.id} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={status.id} 
+                            checked={selectedStatus.includes(status.id)}
+                            onCheckedChange={() => handleStatusToggle(status.id)}
+                          />
+                          <label 
+                            htmlFor={status.id}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {status.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+                
+                <TabsContent value="upcoming" className="mt-6">
+                  {upcomingDates.length > 0 ? (
+                    <div className="space-y-8">
+                      {upcomingDates.map(dateKey => (
+                        <div key={dateKey}>
+                          <h3 className="text-lg font-medium mb-3 flex items-center">
+                            <Calendar className="mr-2 h-5 w-5 text-muted-foreground" />
+                            {new Date(dateKey).toLocaleDateString('pt-BR', { 
+                              weekday: 'long', 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            })}
+                          </h3>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            {groupedItems[dateKey].map((item, index) => (
+                              <Card key={index} className="overflow-hidden">
+                                <CardHeader className="pb-2">
+                                  <CardTitle>{item.product.name}</CardTitle>
+                                  <CardDescription>
+                                    {item.quantity} unidades
+                                  </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                  <ScheduleStatus 
+                                    status={getRandomStatus(index) as any}
+                                    scheduledDate={item.scheduleInfo?.date || new Date()}
+                                    estimatedDeliveryTime={item.scheduleInfo?.time}
+                                  />
+                                </CardContent>
+                                <CardFooter className="bg-muted/10 border-t flex justify-between">
+                                  <div className="text-sm">
+                                    <span className="font-medium">Total:</span> R$ {(item.product.price * item.quantity).toFixed(2)}
+                                  </div>
+                                  <Button variant="outline" size="sm">
+                                    Detalhes
+                                  </Button>
+                                </CardFooter>
+                              </Card>
+                            ))}
                           </div>
                         </div>
                       ))}
                     </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <Button variant="outline" onClick={() => navigate("/combos")}>
-                      Ver Todos os Combos
-                    </Button>
-                    <Button onClick={nextStep}>
-                      Continuar
-                    </Button>
-                  </CardFooter>
-                </Card>
-              )}
-              
-              {/* Step 2: Choose Date & Time */}
-              {currentStep === 2 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Escolha a Data e Horário</CardTitle>
-                    <CardDescription>
-                      Selecione quando deseja receber seu pedido
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h3 className="text-sm font-medium flex items-center">
-                          <CalendarIcon className="h-4 w-4 mr-1" />
-                          Data da Entrega
-                        </h3>
-                        <FormField
-                          control={form.control}
-                          name="date"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) => 
-                                  date < minDate || 
-                                  date > maxDate || 
-                                  isWeekend(date)
-                                }
-                                className="rounded-md border mx-auto"
-                              />
-                              <FormDescription className="text-center">
-                                Entregas disponíveis apenas em dias úteis
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <h3 className="text-sm font-medium flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          Horário da Entrega
-                        </h3>
-                        <FormField
-                          control={form.control}
-                          name="time"
-                          render={({ field }) => (
-                            <FormItem>
-                              <div className="grid grid-cols-3 gap-2">
-                                {availableTimes.map((timeSlot) => {
-                                  const isAvailable = isTimeSlotAvailable(timeSlot);
-                                  return (
-                                    <button
-                                      key={timeSlot}
-                                      type="button"
-                                      className={`
-                                        p-3 text-sm border rounded-md text-center transition-colors
-                                        ${field.value === timeSlot ? 
-                                          'bg-primary border-primary text-primary-foreground' : 
-                                          isAvailable ? 
-                                            'hover:border-primary' : 
-                                            'opacity-50 cursor-not-allowed bg-muted'
-                                        }
-                                      `}
-                                      disabled={!isAvailable}
-                                      onClick={() => field.onChange(timeSlot)}
-                                    >
-                                      {timeSlot}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                              <FormDescription className="text-center mt-2">
-                                Os horários em cinza não estão disponíveis
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                  ) : (
+                    <div className="text-center py-10">
+                      <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium mb-2">Nenhuma entrega agendada</h3>
+                      <p className="text-muted-foreground mb-6">
+                        Você não tem entregas futuras agendadas.
+                      </p>
+                      <Button onClick={() => navigate('/produtos')}>
+                        <ShoppingBag className="mr-2 h-4 w-4" />
+                        Explorar Produtos
+                      </Button>
                     </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <Button variant="outline" onClick={prevStep}>
-                      Voltar
-                    </Button>
-                    <Button onClick={nextStep}>
-                      Continuar
-                    </Button>
-                  </CardFooter>
-                </Card>
-              )}
-              
-              {/* Step 3: Customer Information */}
-              {currentStep === 3 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Informações do Cliente</CardTitle>
-                    <CardDescription>
-                      Preencha seus dados para finalizar o agendamento
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Summary */}
-                    <div className="bg-muted/50 p-4 rounded-lg">
-                      <h3 className="font-medium mb-2 flex items-center">
-                        <CalendarClock className="h-4 w-4 mr-2" />
-                        Resumo do Agendamento
-                      </h3>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="text-muted-foreground">Combo:</div>
-                        <div>{combos.find(c => c.id === selectedCombo)?.name}</div>
-                        
-                        <div className="text-muted-foreground">Quantidade:</div>
-                        <div>{combos.find(c => c.id === selectedCombo)?.quantity} unidades</div>
-                        
-                        <div className="text-muted-foreground">Data:</div>
-                        <div>{form.getValues("date")?.toLocaleDateString()}</div>
-                        
-                        <div className="text-muted-foreground">Horário:</div>
-                        <div>{form.getValues("time")}</div>
-                        
-                        <div className="text-muted-foreground">Valor:</div>
-                        <div className="font-medium text-primary">
-                          R$ {combos.find(c => c.id === selectedCombo)?.price.toFixed(2)}
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="past" className="mt-6">
+                  {pastDates.length > 0 ? (
+                    <div className="space-y-8">
+                      {pastDates.map(dateKey => (
+                        <div key={dateKey}>
+                          <h3 className="text-lg font-medium mb-3 flex items-center">
+                            <Calendar className="mr-2 h-5 w-5 text-muted-foreground" />
+                            {new Date(dateKey).toLocaleDateString('pt-BR', { 
+                              weekday: 'long', 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            })}
+                          </h3>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            {groupedItems[dateKey].map((item, index) => (
+                              <Card key={index} className="overflow-hidden border-l-4 border-l-gray-300">
+                                <CardHeader className="pb-2">
+                                  <CardTitle>{item.product.name}</CardTitle>
+                                  <CardDescription>
+                                    {item.quantity} unidades
+                                  </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                  <ScheduleStatus 
+                                    status="delivered"
+                                    scheduledDate={item.scheduleInfo?.date || new Date()}
+                                    estimatedDeliveryTime={item.scheduleInfo?.time}
+                                  />
+                                </CardContent>
+                                <CardFooter className="bg-muted/10 border-t flex justify-between">
+                                  <div className="text-sm">
+                                    <span className="font-medium">Total:</span> R$ {(item.product.price * item.quantity).toFixed(2)}
+                                  </div>
+                                  <Button variant="outline" size="sm">
+                                    Pedir Novamente
+                                  </Button>
+                                </CardFooter>
+                              </Card>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                    
-                    <Separator />
-                    
-                    {/* Contact Information */}
-                    <div className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nome Completo</FormLabel>
-                            <FormControl>
-                              <input
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                placeholder="Seu nome completo"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Telefone</FormLabel>
-                            <FormControl>
-                              <input
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                placeholder="(00) 00000-0000"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Telefone para contato no dia da entrega
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="address"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Endereço de Entrega</FormLabel>
-                            <FormControl>
-                              <textarea
-                                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                placeholder="Rua, número, complemento, bairro, cidade, CEP"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="notes"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Observações (opcional)</FormLabel>
-                            <FormControl>
-                              <textarea
-                                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                placeholder="Instruções especiais para entrega..."
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Informações adicionais para o entregador
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                  ) : (
+                    <div className="text-center py-10">
+                      <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium mb-2">Nenhuma entrega passada</h3>
+                      <p className="text-muted-foreground">
+                        Você não tem histórico de entregas passadas.
+                      </p>
                     </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <Button type="button" variant="outline" onClick={prevStep}>
-                      Voltar
-                    </Button>
-                    <Button type="submit">
-                      Confirmar Agendamento
-                    </Button>
-                  </CardFooter>
-                </Card>
-              )}
-            </form>
-          </Form>
-        </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-16 bg-muted/20 rounded-lg">
+            <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2">Nenhum Agendamento</h2>
+            <p className="text-gray-600 max-w-md mx-auto mb-8">
+              Você ainda não tem entregas agendadas. Adicione produtos ao carrinho e agende uma entrega para eventos ou ocasiões especiais.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button onClick={() => navigate('/produtos')} variant="default">
+                <ShoppingBag className="mr-2 h-4 w-4" />
+                Explorar Produtos
+              </Button>
+              <Button onClick={() => navigate('/combos')} variant="outline">
+                Ver Combos para Eventos
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {totalItems > 0 && totalItems >= 100 && scheduledItems.length === 0 && (
+          <Card className="mt-10">
+            <CardHeader>
+              <CardTitle>Agendar Entrega para seu Carrinho</CardTitle>
+              <CardDescription>
+                Você tem {totalItems} itens no seu carrinho que podem ser agendados para entrega.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScheduleDelivery 
+                onSchedule={(date, time, note) => {
+                  // Schedule all cart items
+                  cartItems.forEach(item => {
+                    updateScheduleInfo(item.product.id, { date, time, note });
+                  });
+                }}
+                currentQuantity={totalItems}
+              />
+            </CardContent>
+          </Card>
+        )}
       </main>
       <Footer />
     </div>

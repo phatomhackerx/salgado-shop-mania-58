@@ -4,14 +4,26 @@ import { Footer } from "@/components/Footer";
 import { HeroSection } from "@/components/HeroSection";
 import { CategorySection } from "@/components/CategorySection";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
+import { SchedulePreview } from "@/components/SchedulePreview";
 import { categories, featuredProducts, newProducts } from "@/data/mock-data";
+import { useCart } from "@/hooks/use-cart";
 
 const Index = () => {
+  const { scheduledItems } = useCart();
+  const hasScheduledItems = scheduledItems.length > 0;
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow">
         <HeroSection />
+        
+        {/* Schedule Preview */}
+        {hasScheduledItems && (
+          <div className="container mx-auto px-4 py-6">
+            <SchedulePreview />
+          </div>
+        )}
         
         <CategorySection categories={categories} />
         

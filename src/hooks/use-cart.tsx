@@ -29,7 +29,9 @@ type CartContextType = {
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   updateScheduleInfo: (productId: number, scheduleInfo: ScheduleInfo) => void;
+  removeScheduleInfo: (productId: number) => void;
   clearCart: () => void;
+  clearScheduledItems: () => void;
   totalItems: number;
   totalPrice: number;
   scheduledItems: CartItem[];
@@ -170,12 +172,45 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const removeScheduleInfo = (productId: number) => {
+    setCartItems(prevItems => {
+      const updatedItems = prevItems.map(item => {
+        if (item.product.id === productId) {
+          const { scheduleInfo, ...rest } = item;
+          return rest;
+        }
+        return item;
+      });
+      
+      toast({
+        title: "Agendamento removido",
+        description: "A entrega não está mais agendada.",
+      });
+      
+      return updatedItems;
+    });
+  };
+
   const clearCart = () => {
     setCartItems([]);
     localStorage.removeItem("cart");
     toast({
       title: "Carrinho limpo",
       description: "Todos os itens foram removidos do carrinho.",
+    });
+  };
+
+  const clearScheduledItems = () => {
+    setCartItems(prevItems => 
+      prevItems.map(item => {
+        const { scheduleInfo, ...rest } = item;
+        return rest;
+      })
+    );
+    
+    toast({
+      title: "Agendamentos removidos",
+      description: "Todos os agendamentos foram removidos.",
     });
   };
 
@@ -187,7 +222,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         removeFromCart,
         updateQuantity,
         updateScheduleInfo,
+        removeScheduleInfo,
         clearCart,
+        clearScheduledItems,
         totalItems,
         totalPrice,
         scheduledItems,
