@@ -26,7 +26,7 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
     toast({
       title: "Produto adicionado",
       description: `${product.name} foi adicionado ao carrinho`,
-      variant: "success",
+      variant: "default",
     });
   };
   
@@ -38,12 +38,14 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
     toast({
       title: isFavorite ? "Removido dos favoritos" : "Adicionado aos favoritos",
       description: `${product.name} foi ${isFavorite ? "removido dos" : "adicionado aos"} favoritos`,
-      variant: isFavorite ? "default" : "success",
+      variant: "default",
     });
   };
 
   // Generate a random rating between 3.5 and 5.0
   const rating = (3.5 + Math.random() * 1.5).toFixed(1);
+  // Convert string to number using parseFloat
+  const ratingValue = parseFloat(rating);
   const reviewCount = Math.floor(Math.random() * 50) + 5;
 
   return (
@@ -117,9 +119,9 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
                 <Star
                   key={star}
                   className={`h-3.5 w-3.5 ${
-                    star <= Math.floor(rating) 
+                    star <= Math.floor(ratingValue) 
                       ? "text-yellow-400 fill-yellow-400" 
-                      : star - 0.5 <= parseFloat(rating) 
+                      : star - 0.5 <= ratingValue 
                         ? "text-yellow-400 fill-yellow-400 opacity-60" 
                         : "text-gray-300"
                   }`}
