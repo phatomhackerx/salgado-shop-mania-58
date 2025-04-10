@@ -5,6 +5,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { CategorySection } from "@/components/CategorySection";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
 import { SchedulePreview } from "@/components/SchedulePreview";
+import { DeliveryStatusWidget } from "@/components/DeliveryStatusWidget";
 import { categories, featuredProducts, newProducts } from "@/data/mock-data";
 import { useCart } from "@/hooks/use-cart";
 import { Award, CalendarClock, ChevronRight, Clock, ShoppingBag, Star, ThumbsUp } from "lucide-react";
@@ -14,6 +15,9 @@ import { Link } from "react-router-dom";
 const Index = () => {
   const { scheduledItems } = useCart();
   const hasScheduledItems = scheduledItems.length > 0;
+  
+  // Randomly show delivery status widget (in a real app, this would be based on actual order status)
+  const showDeliveryStatus = Math.random() > 0.5;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -178,6 +182,9 @@ const Index = () => {
         </div>
       </main>
       <Footer />
+      
+      {/* Delivery Status Widget - only show sometimes */}
+      {showDeliveryStatus && <DeliveryStatusWidget />}
     </div>
   );
 };

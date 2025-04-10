@@ -6,7 +6,9 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Product, useCart } from "@/hooks/use-cart";
 import { useState } from "react";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
+import { RatingStars } from "@/components/RatingStars";
+import { ProductQuickView } from "@/components/ProductQuickView";
 
 type ProductCardProps = {
   product: Product;
@@ -49,7 +51,7 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
   const reviewCount = Math.floor(Math.random() * 50) + 5;
 
   return (
-    <Link to={`/produtos/${product.id}`}>
+    <ProductQuickView product={product}>
       <Card 
         className={`overflow-hidden transition-all duration-300 h-full flex flex-col ${
           featured ? 'border-primary/20 shadow-md' : 'hover:shadow-md'
@@ -113,28 +115,13 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
           </div>
           
           {/* Rating stars */}
-          <div className="flex items-center mb-1">
-            <div className="flex mr-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className={`h-3.5 w-3.5 ${
-                    star <= Math.floor(ratingValue) 
-                      ? "text-yellow-400 fill-yellow-400" 
-                      : star - 0.5 <= ratingValue 
-                        ? "text-yellow-400 fill-yellow-400 opacity-60" 
-                        : "text-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-xs font-medium text-gray-600">
-              {rating}
-            </span>
-            <span className="text-xs text-gray-500 ml-1">
-              ({reviewCount})
-            </span>
-          </div>
+          <RatingStars 
+            rating={ratingValue} 
+            size="sm" 
+            showScore={true} 
+            reviewCount={reviewCount}
+            className="mb-1"
+          />
         </CardContent>
         
         <CardFooter className="p-4 pt-0 flex items-center justify-between border-t mt-auto">
@@ -158,6 +145,6 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
           </Button>
         </CardFooter>
       </Card>
-    </Link>
+    </ProductQuickView>
   );
 };
