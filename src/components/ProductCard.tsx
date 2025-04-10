@@ -1,15 +1,17 @@
 
 import { Link } from "react-router-dom";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Product, useCart } from "@/hooks/use-cart";
 
 type ProductCardProps = {
   product: Product;
+  featured?: boolean;
 };
 
-export const ProductCard = ({ product }: ProductCardProps) => {
+export const ProductCard = ({ product, featured = false }: ProductCardProps) => {
   const { addToCart } = useCart();
   
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -20,7 +22,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <Link to={`/produtos/${product.id}`}>
-      <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg h-full flex flex-col">
+      <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg h-full flex flex-col ${featured ? 'border-primary/20' : ''}`}>
         <div className="aspect-square overflow-hidden relative group">
           <img
             src={product.image}
@@ -37,12 +39,33 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               Adicionar
             </Button>
           </div>
+          
+          {featured && (
+            <Badge className="absolute top-2 left-2 bg-primary">Destaque</Badge>
+          )}
         </div>
         <CardContent className="p-4 flex-grow">
           <h3 className="font-semibold text-base/tight text-gray-800 mb-1 line-clamp-2">
             {product.name}
           </h3>
           <p className="text-xs text-gray-500 mb-2">{product.category}</p>
+          
+          {/* Rating stars */}
+          <div className="flex items-center mb-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                className={`h-3.5 w-3.5 ${
+                  star <= Math.floor(4 + Math.random()) 
+                    ? "text-yellow-400 fill-yellow-400" 
+                    : "text-gray-300"
+                }`}
+              />
+            ))}
+            <span className="text-xs text-gray-500 ml-1">
+              ({Math.floor(Math.random() * 50) + 5})
+            </span>
+          </div>
         </CardContent>
         <CardFooter className="p-4 pt-0 flex items-center justify-between">
           <span className="font-bold text-primary">

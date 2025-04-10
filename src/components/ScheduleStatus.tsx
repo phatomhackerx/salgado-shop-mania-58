@@ -70,7 +70,7 @@ export const ScheduleStatus = ({
                 </div>
                 <div className={`
                   text-xs mt-2 text-center max-w-[80px] transition-colors duration-300
-                  ${isCurrentStep ? `text-${step.color.replace('bg-', '')} font-bold` : isActive ? `text-${step.color.replace('bg-', '')} font-medium` : 'text-gray-500'}
+                  ${isCurrentStep ? 'text-primary font-bold' : isActive ? 'text-primary/80 font-medium' : 'text-gray-500'}
                 `}>
                   {step.label}
                 </div>
