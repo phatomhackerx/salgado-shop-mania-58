@@ -55,12 +55,12 @@ export const SchedulePreview = () => {
   });
   
   return (
-    <Card className="shadow-md hover:shadow-lg transition-shadow border-l-4 border-l-primary overflow-hidden">
+    <Card className="shadow-md hover:shadow-lg transition-shadow border-l-4 border-l-primary overflow-hidden bg-white animate-fade-in">
       <CardHeader className="pb-2 bg-primary/5">
         <CardTitle className="text-lg flex items-center">
           <CalendarClock className="mr-2 h-5 w-5 text-primary" />
           Próxima Entrega Agendada
-          {isToday && <Badge className="ml-2 bg-accent">Hoje</Badge>}
+          {isToday && <Badge className="ml-2 bg-accent animate-pulse-soft">Hoje</Badge>}
         </CardTitle>
       </CardHeader>
       <CardContent className="pb-3 pt-4">
@@ -105,10 +105,10 @@ export const SchedulePreview = () => {
         </div>
       </CardContent>
       <CardFooter className="bg-muted/10 border-t">
-        <Button variant="outline" size="sm" asChild className="w-full">
+        <Button variant="outline" size="sm" asChild className="w-full group">
           <Link to="/agendamento" className="flex justify-between items-center">
             <span>Ver Todos Agendamentos</span>
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </Button>
       </CardFooter>
