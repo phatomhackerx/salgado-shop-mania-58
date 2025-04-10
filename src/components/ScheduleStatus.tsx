@@ -1,5 +1,5 @@
 
-import { Clock, CheckCircle, TruckDelivery, Calendar } from "lucide-react";
+import { Clock, CheckCircle, Truck, Calendar } from "lucide-react";
 
 type StatusType = "scheduled" | "preparing" | "on-the-way" | "delivered";
 
@@ -17,7 +17,7 @@ export const ScheduleStatus = ({
   const steps = [
     { id: "scheduled", label: "Agendado", icon: Calendar },
     { id: "preparing", label: "Em Preparação", icon: Clock },
-    { id: "on-the-way", label: "A Caminho", icon: TruckDelivery },
+    { id: "on-the-way", label: "A Caminho", icon: Truck },
     { id: "delivered", label: "Entregue", icon: CheckCircle },
   ];
 
