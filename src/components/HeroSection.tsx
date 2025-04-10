@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Calendar, ShoppingBag } from "lucide-react";
 
 export const HeroSection = () => {
   return (
@@ -17,17 +18,23 @@ export const HeroSection = () => {
       <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
         <div className="max-w-3xl">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Salgados Deliciosos Direto na Sua Casa
+            Planeje seus Eventos com Nossos Salgados
           </h1>
           <p className="text-lg md:text-xl opacity-90 mb-8">
-            Os melhores coxinhas, pastéis, empadas e muito mais, com entrega rápida e preços imbatíveis!
+            Coxinhas, pastéis e empadas deliciosos para festas e eventos com agendamento fácil e entrega pontual!
           </p>
           <div className="flex flex-wrap gap-4">
-            <Button size="lg" asChild className="bg-white text-primary hover:bg-gray-100">
-              <Link to="/produtos">Ver Cardápio</Link>
+            <Button size="lg" asChild className="bg-white text-primary hover:bg-gray-100 shadow-lg transition-all">
+              <Link to="/produtos" className="flex items-center">
+                <ShoppingBag className="mr-2 h-5 w-5" />
+                Ver Cardápio
+              </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="border-white text-white hover:bg-white/20">
-              <Link to="/promocoes">Ofertas Especiais</Link>
+            <Button size="lg" variant="outline" asChild className="border-white text-white hover:bg-white/20 shadow-lg transition-all">
+              <Link to="/agendamento" className="flex items-center">
+                <Calendar className="mr-2 h-5 w-5" />
+                Agendar Salgados
+              </Link>
             </Button>
           </div>
         </div>

@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,4 +99,88 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Enhanced animations */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes float-enhanced {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--rotation, 0deg));
+  }
+  50% {
+    transform: translateY(-8px) rotate(var(--rotation, 0deg));
+  }
+}
+
+@keyframes slide-in-bottom {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Apply animations to elements */
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float-enhanced 3s ease-in-out infinite;
+  --rotation: 0deg;
+}
+
+.animate-float-delay-1 {
+  animation: float-enhanced 3s ease-in-out infinite;
+  animation-delay: 1s;
+  --rotation: 12deg;
+}
+
+.animate-float-delay-2 {
+  animation: float-enhanced 3s ease-in-out infinite;
+  animation-delay: 2s;
+  --rotation: -12deg;
+}
+
+.animate-slide-in-bottom {
+  animation: slide-in-bottom 0.5s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s ease-out forwards;
+}
+
+/* Add some custom utility classes */
+.card-hover {
+  @apply transition-shadow duration-300 hover:shadow-lg;
+}
+
+.btn-hover {
+  @apply transition-all duration-300 hover:scale-105;
+}
+
+.glass-effect {
+  @apply bg-white/40 backdrop-blur-md;
 }

@@ -35,9 +35,9 @@ export const ScheduleStatus = ({
 
       <div className="relative">
         {/* Progress bar */}
-        <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200 rounded-full">
+        <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-primary rounded-full transition-all duration-500" 
+            className="h-full bg-primary rounded-full transition-all duration-700 ease-in-out" 
             style={{ 
               width: `${currentStepIndex === 0 ? 5 : 
                       currentStepIndex === 1 ? 33 : 
@@ -52,22 +52,25 @@ export const ScheduleStatus = ({
           {steps.map((step, index) => {
             const StepIcon = step.icon;
             const isActive = index <= currentStepIndex;
+            const isCurrentStep = index === currentStepIndex;
             
             return (
               <div key={step.id} className="flex flex-col items-center">
                 <div className={`
                   w-10 h-10 rounded-full flex items-center justify-center 
-                  z-10 transition-colors duration-300
-                  ${isActive 
-                    ? 'bg-primary text-white' 
-                    : 'bg-gray-100 text-gray-400'
+                  z-10 transition-all duration-300
+                  ${isCurrentStep 
+                    ? 'bg-primary text-white scale-110 shadow-md' 
+                    : isActive 
+                      ? 'bg-primary/90 text-white' 
+                      : 'bg-gray-100 text-gray-400'
                   }
                 `}>
-                  <StepIcon className="h-5 w-5" />
+                  <StepIcon className={`h-5 w-5 ${isCurrentStep ? 'animate-pulse' : ''}`} />
                 </div>
                 <div className={`
-                  text-xs mt-2 text-center max-w-[80px] transition-colors
-                  ${isActive ? 'text-primary font-medium' : 'text-gray-500'}
+                  text-xs mt-2 text-center max-w-[80px] transition-colors duration-300
+                  ${isCurrentStep ? 'text-primary font-bold' : isActive ? 'text-primary font-medium' : 'text-gray-500'}
                 `}>
                   {step.label}
                 </div>
