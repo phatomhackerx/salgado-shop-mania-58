@@ -71,13 +71,13 @@ export const AdminDashboard = () => {
     { id: "PED-2342", customer: "Ana Souza", date: "14/04/2025", amount: "R$ 65,00", status: "Entregue" },
   ];
   
-  // Most sold products 
+  // Most sold products - add the rating property to the product objects
   const mostSoldProducts = featuredProducts.slice(0, 5).map(product => ({
     id: product.id,
     name: product.name,
     price: product.price,
     quantity: Math.floor(Math.random() * 100) + 50, // Random quantity for demo
-    rating: product.rating
+    rating: Math.floor(Math.random() * 5) + 1 // Adding a random rating between 1-5
   }));
   
   return (
