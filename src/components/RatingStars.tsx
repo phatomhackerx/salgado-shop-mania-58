@@ -1,5 +1,10 @@
 
 import { Star } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from "@/components/ui/tooltip";
 
 interface RatingStarsProps {
   rating: number;
@@ -8,6 +13,7 @@ interface RatingStarsProps {
   showScore?: boolean;
   reviewCount?: number;
   className?: string;
+  showTooltip?: boolean;
 }
 
 export const RatingStars = ({
@@ -16,7 +22,8 @@ export const RatingStars = ({
   size = "md",
   showScore = false,
   reviewCount,
-  className = ""
+  className = "",
+  showTooltip = false
 }: RatingStarsProps) => {
   const starSizes = {
     sm: "h-3.5 w-3.5",
@@ -30,7 +37,7 @@ export const RatingStars = ({
     lg: "text-base"
   };
   
-  return (
+  const renderStars = () => (
     <div className={`flex items-center ${className}`}>
       <div className="flex">
         {Array.from({ length: maxRating }).map((_, i) => (
@@ -60,4 +67,22 @@ export const RatingStars = ({
       )}
     </div>
   );
+
+  if (showTooltip) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {renderStars()}
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{rating.toFixed(1)} de {maxRating} estrelas</p>
+          {reviewCount !== undefined && (
+            <p className="text-xs text-gray-500">{reviewCount} avaliações</p>
+          )}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return renderStars();
 };
