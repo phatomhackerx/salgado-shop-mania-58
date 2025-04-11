@@ -7,7 +7,8 @@ import {
   X, 
   Search,
   Calendar,
-  CalendarClock
+  CalendarClock,
+  Briefcase
 } from "lucide-react";
 import { 
   Sheet, 
@@ -147,7 +148,7 @@ export const Navbar = () => {
             </nav>
           )}
           
-          {/* Search, Cart and Mobile Menu */}
+          {/* Search, Admin, Cart and Mobile Menu */}
           <div className="flex items-center space-x-3">
             {/* Search */}
             <form 
@@ -167,14 +168,25 @@ export const Navbar = () => {
               />
             </form>
             
+            {/* Admin Button */}
+            <Link to="/admin" className="relative group">
+              <Briefcase className="h-6 w-6 text-gray-700 hover:text-primary transition-colors" />
+              <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-max bg-black text-white text-xs py-0.5 px-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                Admin
+              </span>
+            </Link>
+            
             {/* Cart */}
-            <Link to="/carrinho" className="relative">
+            <Link to="/carrinho" className="relative group">
               <ShoppingCart className="h-6 w-6 text-gray-700 hover:text-primary transition-colors" />
               {totalItems > 0 && (
                 <Badge className="absolute -top-2 -right-2 px-1.5 py-0.5 min-w-[1.5rem] text-center">
                   {totalItems}
                 </Badge>
               )}
+              <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-max bg-black text-white text-xs py-0.5 px-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                Carrinho
+              </span>
             </Link>
             
             {/* Mobile Menu */}
@@ -272,6 +284,17 @@ export const Navbar = () => {
                           {hasScheduledItems && (
                             <Badge>{scheduledItems.length}</Badge>
                           )}
+                        </Link>
+                      </SheetClose>
+                      
+                      {/* Admin Link in Mobile */}
+                      <SheetClose asChild>
+                        <Link 
+                          to="/admin" 
+                          className="flex items-center p-2 rounded-lg hover:bg-gray-100"
+                        >
+                          <Briefcase className="mr-2 h-4 w-4" />
+                          Painel Admin
                         </Link>
                       </SheetClose>
                       

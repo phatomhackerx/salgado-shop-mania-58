@@ -92,6 +92,39 @@ body {
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 
+/* Admin Dashboard specific styles */
+.admin-stats-card {
+  transition: all 0.2s ease;
+}
+
+.admin-stats-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-alert {
+  border-left: 4px solid;
+  transition: all 0.2s ease;
+}
+
+.admin-alert:hover {
+  transform: translateX(4px);
+}
+
+/* Animation for status indicators */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.status-active {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 .card {
   padding: 2em;
 }

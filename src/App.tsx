@@ -15,6 +15,8 @@ import SchedulePage from "./pages/SchedulePage";
 import CombosPage from "./pages/CombosPage";
 import NotFound from "./pages/NotFound";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AdminLayout } from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +37,18 @@ const App = () => (
             <Route path="/carrinho" element={<CartPage />} />
             <Route path="/agendamento" element={<SchedulePage />} />
             <Route path="/combos" element={<CombosPage />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="pedidos" element={<AdminDashboard />} />
+              <Route path="produtos" element={<AdminDashboard />} />
+              <Route path="clientes" element={<AdminDashboard />} />
+              <Route path="agendamentos" element={<AdminDashboard />} />
+              <Route path="relatorios" element={<AdminDashboard />} />
+              <Route path="configuracoes" element={<AdminDashboard />} />
+            </Route>
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
