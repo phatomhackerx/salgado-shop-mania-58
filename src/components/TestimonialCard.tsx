@@ -1,6 +1,7 @@
 
 import { Star, Quote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { RatingStars } from "./RatingStars";
 
 interface TestimonialCardProps {
   name: string;
@@ -26,28 +27,24 @@ export const TestimonialCard = ({
       <CardContent className="p-6 relative">
         <Quote className="absolute top-4 right-4 h-16 w-16 text-gray-100 rotate-12" />
         
-        <div className="flex items-center mb-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star
-              key={i}
-              className={`h-4 w-4 ${
-                i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
-              }`}
-            />
-          ))}
-        </div>
+        <RatingStars 
+          rating={rating} 
+          size="md" 
+          showScore={false} 
+          className="mb-4"
+        />
         
-        <p className="text-gray-600 mb-6 relative z-10">{content}</p>
+        <p className="text-gray-600 mb-6 relative z-10 italic">{content}</p>
         
         <div className="flex items-center mt-4">
           {image ? (
             <img 
               src={image} 
               alt={name} 
-              className="h-10 w-10 rounded-full mr-3 object-cover"
+              className="h-10 w-10 rounded-full mr-3 object-cover border-2 border-gray-100 shadow-sm"
             />
           ) : (
-            <div className={`h-10 w-10 rounded-full mr-3 flex items-center justify-center text-white bg-primary font-semibold`}>
+            <div className={`h-10 w-10 rounded-full mr-3 flex items-center justify-center text-white bg-gradient-to-br from-primary to-primary-600 font-semibold shadow-sm`}>
               {name.charAt(0)}
             </div>
           )}

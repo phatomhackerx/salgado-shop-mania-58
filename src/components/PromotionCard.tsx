@@ -1,5 +1,5 @@
 
-import { CalendarClock, Clock, ShoppingCart } from "lucide-react";
+import { CalendarClock, Clock, ShoppingCart, Tag, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +43,7 @@ export const PromotionCard = ({
   };
 
   return (
-    <Card className={`overflow-hidden border-2 bg-gradient-to-br ${themeClasses[theme]} transition-all duration-300 hover:shadow-lg group`}>
+    <Card className={`overflow-hidden border-2 bg-gradient-to-br ${themeClasses[theme]} transition-all duration-300 hover:shadow-xl group`}>
       <div className="relative">
         <img 
           src={image} 
@@ -52,7 +52,8 @@ export const PromotionCard = ({
         />
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/60 to-transparent"></div>
         
-        <Badge className={`absolute top-2 right-2 ${themeBadgeClasses[theme]} text-lg px-3 py-1.5 shadow-lg`}>
+        <Badge className={`absolute top-2 right-2 ${themeBadgeClasses[theme]} text-lg px-3 py-1.5 shadow-lg flex items-center gap-1`}>
+          <Sparkles className="h-3.5 w-3.5" />
           {discount}
         </Badge>
         
@@ -70,13 +71,14 @@ export const PromotionCard = ({
       </CardContent>
       
       <CardFooter className="flex justify-between items-center p-5 pt-0">
-        <Button asChild variant="ghost" className={`${themeTextClasses[theme]} p-0 hover:bg-transparent hover:underline`}>
+        <Button asChild variant="ghost" className={`${themeTextClasses[theme]} p-0 hover:bg-transparent hover:underline flex items-center gap-1`}>
           <Link to={link}>
+            <Tag className="h-3.5 w-3.5" />
             Ver detalhes
           </Link>
         </Button>
         
-        <Button asChild variant="secondary" size="sm" className="gap-2">
+        <Button asChild variant="secondary" size="sm" className="gap-2 shadow-sm hover:shadow-md transition-all">
           <Link to={link}>
             <ShoppingCart className="h-4 w-4" />
             Aproveitar

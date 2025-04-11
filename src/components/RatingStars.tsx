@@ -44,12 +44,12 @@ export const RatingStars = ({
           <Star
             key={i}
             className={`${starSizes[size]} ${
-              i + 1 <= Math.floor(rating) 
+              i < Math.floor(rating) 
                 ? "text-yellow-400 fill-yellow-400" 
-                : i + 0.5 < rating 
+                : i < Math.floor(rating) + 0.5 
                   ? "text-yellow-400 fill-yellow-400 opacity-60" 
                   : "text-gray-300"
-            }`}
+            } transition-colors duration-200`}
           />
         ))}
       </div>
@@ -74,8 +74,8 @@ export const RatingStars = ({
         <TooltipTrigger asChild>
           {renderStars()}
         </TooltipTrigger>
-        <TooltipContent>
-          <p>{rating.toFixed(1)} de {maxRating} estrelas</p>
+        <TooltipContent className="bg-white border shadow-md">
+          <p className="font-medium">{rating.toFixed(1)} de {maxRating} estrelas</p>
           {reviewCount !== undefined && (
             <p className="text-xs text-gray-500">{reviewCount} avaliações</p>
           )}
