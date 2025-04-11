@@ -9,7 +9,9 @@ import {
   BarChart3,
   Settings,
   ChevronLeft,
-  Briefcase
+  Briefcase,
+  Truck,
+  UserCog
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -53,6 +55,16 @@ export const AdminSidebar = ({ open, onOpenChange }: AdminSidebarProps) => {
       title: "Relatórios",
       href: "/admin/relatorios",
       icon: BarChart3
+    },
+    {
+      title: "Colaboradores",
+      href: "/admin/colaboradores",
+      icon: UserCog
+    },
+    {
+      title: "Fornecedores",
+      href: "/admin/fornecedores",
+      icon: Truck
     }
   ];
   

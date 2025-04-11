@@ -17,6 +17,14 @@ import NotFound from "./pages/NotFound";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import PedidosPage from "./pages/admin/PedidosPage";
+import ProdutosPage from "./pages/admin/ProdutosPage";
+import ClientesPage from "./pages/admin/ClientesPage";
+import AgendamentosPage from "./pages/admin/AgendamentosPage";
+import RelatoriosPage from "./pages/admin/RelatoriosPage";
+import ColaboradoresPage from "./pages/admin/ColaboradoresPage";
+import FornecedoresPage from "./pages/admin/FornecedoresPage";
+import ConfiguracoesPage from "./pages/admin/ConfiguracoesPage";
 
 const queryClient = new QueryClient();
 
@@ -41,12 +49,14 @@ const App = () => (
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
-              <Route path="pedidos" element={<AdminDashboard />} />
-              <Route path="produtos" element={<AdminDashboard />} />
-              <Route path="clientes" element={<AdminDashboard />} />
-              <Route path="agendamentos" element={<AdminDashboard />} />
-              <Route path="relatorios" element={<AdminDashboard />} />
-              <Route path="configuracoes" element={<AdminDashboard />} />
+              <Route path="pedidos" element={<PedidosPage />} />
+              <Route path="produtos" element={<ProdutosPage />} />
+              <Route path="clientes" element={<ClientesPage />} />
+              <Route path="agendamentos" element={<AgendamentosPage />} />
+              <Route path="relatorios" element={<RelatoriosPage />} />
+              <Route path="colaboradores" element={<ColaboradoresPage />} />
+              <Route path="fornecedores" element={<FornecedoresPage />} />
+              <Route path="configuracoes" element={<ConfiguracoesPage />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />
