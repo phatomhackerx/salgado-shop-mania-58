@@ -47,7 +47,7 @@ export const AdvancedFilterSection = ({
   };
   
   const handleResetFilters = () => {
-    const resetFilters = {
+    const resetFilters: FilterSettings = {
       categories: [],
       priceRange: [minPrice, maxPrice]
     };

@@ -15,12 +15,14 @@ type ProductCardProps = {
   product: Product;
   featured?: boolean;
   compact?: boolean;
+  showRating?: boolean;
 };
 
 export const ProductCard = ({ 
   product, 
   featured = false, 
-  compact = false 
+  compact = false,
+  showRating = true
 }: ProductCardProps) => {
   const { addToCart } = useCart();
   const [isHovered, setIsHovered] = useState(false);
@@ -132,8 +134,8 @@ export const ProductCard = ({
             </p>
           </div>
           
-          {/* Rating stars - hide on compact view */}
-          {!compact && (
+          {/* Rating stars - only show if showRating is true and not in compact view */}
+          {showRating && !compact && (
             <RatingStars 
               rating={ratingValue} 
               size="sm" 
