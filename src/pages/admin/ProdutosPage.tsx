@@ -10,7 +10,11 @@ import {
   ArrowUpDown,
   FileImage,
   BarChart2,
-  Tag 
+  Tag,
+  ChevronDown,
+  Download,
+  Upload,
+  ChevronRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -42,10 +46,25 @@ import {
 } from "@/components/ui/pagination";
 import { RatingStars } from "@/components/RatingStars";
 import { featuredProducts, newProducts, categories } from "@/data/mock-data";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 export const ProdutosPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("todas");
+  const [showFilters, setShowFilters] = useState(false);
+  const isMobile = useIsMobile();
   
   // Combine and augment products with additional data
   const products = [...featuredProducts, ...newProducts].map(product => ({
@@ -73,10 +92,33 @@ export const ProdutosPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Produtos</h2>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Produto
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button className="w-full sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Produto
+          </Button>
+          {!isMobile && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Download className="mr-2 h-4 w-4" />
+                  Exportar
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>
+                  <Download className="mr-2 h-4 w-4" />
+                  Exportar CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Download className="mr-2 h-4 w-4" />
+                  Exportar Excel
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
       
       {/* Product Statistics */}
@@ -122,8 +164,23 @@ export const ProdutosPage = () => {
         </Card>
       </div>
       
+      {/* Mobile filter toggle */}
+      {isMobile && (
+        <Button 
+          variant="outline" 
+          className="w-full flex justify-between items-center"
+          onClick={() => setShowFilters(!showFilters)}
+        >
+          <span className="flex items-center">
+            <Filter className="mr-2 h-4 w-4" />
+            Filtros e Busca
+          </span>
+          <ChevronDown className="h-4 w-4" />
+        </Button>
+      )}
+      
       {/* Filter and search */}
-      <div className="flex flex-col gap-4 md:flex-row">
+      <div className={`${isMobile && !showFilters ? 'hidden' : 'block'} flex flex-col gap-4 md:flex-row`}>
         <div className="flex-1 relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
           <Input
@@ -155,7 +212,7 @@ export const ProdutosPage = () => {
         <CardHeader className="px-6 py-4">
           <CardTitle className="text-lg">Lista de Produtos</CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -165,11 +222,11 @@ export const ProdutosPage = () => {
                     Produto <ArrowUpDown className="ml-1 h-3 w-3" />
                   </Button>
                 </TableHead>
-                <TableHead>Categoria</TableHead>
+                <TableHead className="hidden md:table-cell">Categoria</TableHead>
                 <TableHead>Preço</TableHead>
-                <TableHead>Estoque</TableHead>
-                <TableHead>Vendas</TableHead>
-                <TableHead>Avaliação</TableHead>
+                <TableHead className="hidden sm:table-cell">Estoque</TableHead>
+                <TableHead className="hidden lg:table-cell">Vendas</TableHead>
+                <TableHead className="hidden md:table-cell">Avaliação</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -189,7 +246,7 @@ export const ProdutosPage = () => {
                       <div className="font-medium">{product.name}</div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <Badge variant="outline" className="font-normal">
                       {product.category}
                     </Badge>
@@ -197,24 +254,56 @@ export const ProdutosPage = () => {
                   <TableCell>
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <div className={`font-medium ${product.stock < 10 ? 'text-red-500' : ''}`}>
                       {product.stock}
                     </div>
                   </TableCell>
-                  <TableCell>{product.sales}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden lg:table-cell">{product.sales}</TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <RatingStars rating={product.rating} size="sm" />
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    {isMobile ? (
+                      <TooltipProvider>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TooltipProvider>
+                    ) : (
+                      <div className="flex justify-end gap-1">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Editar</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Excluir</TooltipContent>
+                        </Tooltip>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -226,7 +315,7 @@ export const ProdutosPage = () => {
       {/* Pagination */}
       <Pagination>
         <PaginationContent>
-          <PaginationItem>
+          <PaginationItem className="hidden sm:inline-block">
             <PaginationPrevious href="#" />
           </PaginationItem>
           <PaginationItem>
@@ -244,10 +333,10 @@ export const ProdutosPage = () => {
               3
             </PaginationLink>
           </PaginationItem>
-          <PaginationItem>
+          <PaginationItem className="hidden sm:inline-block">
             <PaginationEllipsis />
           </PaginationItem>
-          <PaginationItem>
+          <PaginationItem className="hidden sm:inline-block">
             <PaginationNext href="#" />
           </PaginationItem>
         </PaginationContent>
