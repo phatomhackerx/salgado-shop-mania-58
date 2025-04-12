@@ -21,6 +21,9 @@ export const CategoryCard = ({ icon, name, slug }: CategoryCardProps) => {
             />
           </div>
           <h3 className="font-medium text-gray-800">{name}</h3>
+          <div className="mt-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+            Ver produtos
+          </div>
         </CardContent>
       </Card>
     </Link>

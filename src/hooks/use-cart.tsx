@@ -15,6 +15,8 @@ type ScheduleInfo = {
   date: Date;
   time: string;
   note?: string;
+  locationId?: number;
+  isPickup?: boolean;
 };
 
 type CartItem = {
@@ -166,9 +168,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       )
     );
     
+    const isPickup = scheduleInfo.isPickup;
+    const messageText = isPickup 
+      ? `Retirada agendada para ${scheduleInfo.date.toLocaleDateString()} às ${scheduleInfo.time}.`
+      : `Entrega agendada para ${scheduleInfo.date.toLocaleDateString()} às ${scheduleInfo.time}.`;
+    
     toast({
-      title: "Agendamento atualizado",
-      description: `Entrega agendada para ${scheduleInfo.date.toLocaleDateString()} às ${scheduleInfo.time}.`,
+      title: isPickup ? "Retirada agendada" : "Agendamento atualizado",
+      description: messageText,
     });
   };
 

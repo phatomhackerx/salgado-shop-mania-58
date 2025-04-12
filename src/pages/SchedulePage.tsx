@@ -1,13 +1,12 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ScheduleDelivery } from "@/components/ScheduleDelivery";
+import { SchedulePickup } from "@/components/SchedulePickup";
 import { ScheduleStatus } from "@/components/ScheduleStatus";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
-import { Calendar, ChevronLeft, Filter, ShoppingBag } from "lucide-react";
+import { Calendar, ChevronLeft, Filter, ShoppingBag, MapPin } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -28,37 +27,56 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+
+const pickupLocations = [
+  { id: 1, name: "Loja Centro", address: "Rua Principal, 123 - Centro" },
+  { id: 2, name: "Loja Norte", address: "Av. Norte, 456 - Bairro Norte" },
+  { id: 3, name: "Loja Sul", address: "Rua Sul, 789 - Bairro Sul" },
+];
 
 const SchedulePage = () => {
   const navigate = useNavigate();
   const { cartItems, scheduledItems, totalItems, updateScheduleInfo } = useCart();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [selectedType, setSelectedType] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("upcoming");
 
-  // Filter options
   const statuses = [
     { id: "scheduled", label: "Agendado" },
     { id: "preparing", label: "Em Preparação" },
     { id: "on-the-way", label: "A Caminho" },
     { id: "delivered", label: "Entregue" },
+    { id: "ready", label: "Pronto para Retirada" },
+  ];
+  
+  const types = [
+    { id: "delivery", label: "Entregas" },
+    { id: "pickup", label: "Retiradas" },
   ];
 
-  // For demo purposes, assign random statuses to scheduled items
-  const getRandomStatus = (index: number) => {
-    const allStatuses = ["scheduled", "preparing", "on-the-way", "delivered"] as const;
-    // Use index to distribute statuses somewhat evenly for the demo
-    return allStatuses[index % allStatuses.length];
+  const getRandomStatus = (index: number, isPickup: boolean) => {
+    const deliveryStatuses = ["scheduled", "preparing", "on-the-way", "delivered"] as const;
+    const pickupStatuses = ["scheduled", "preparing", "ready", "delivered"] as const;
+    
+    if (isPickup) {
+      return pickupStatuses[index % pickupStatuses.length];
+    }
+    return deliveryStatuses[index % deliveryStatuses.length];
   };
 
-  // Filter scheduled items based on selected status
   const filteredItems = scheduledItems.filter(item => {
-    if (selectedStatus.length === 0) return true;
-    const itemStatus = getRandomStatus(scheduledItems.indexOf(item)) as string;
-    return selectedStatus.includes(itemStatus);
+    const isPickup = item.scheduleInfo?.isPickup || false;
+    const itemType = isPickup ? "pickup" : "delivery";
+    const itemStatus = getRandomStatus(scheduledItems.indexOf(item), isPickup) as string;
+    
+    const matchesStatus = selectedStatus.length === 0 || selectedStatus.includes(itemStatus);
+    const matchesType = selectedType.length === 0 || selectedType.includes(itemType);
+    
+    return matchesStatus && matchesType;
   });
 
-  // Group scheduled items by date
   const groupByDate = (items: typeof scheduledItems) => {
     const groups: Record<string, typeof scheduledItems> = {};
     
@@ -77,12 +95,10 @@ const SchedulePage = () => {
 
   const groupedItems = groupByDate(filteredItems);
   
-  // Sort dates
   const sortedDates = Object.keys(groupedItems).sort((a, b) => {
     return new Date(a).getTime() - new Date(b).getTime();
   });
 
-  // Split into upcoming and past
   const today = new Date().toISOString().split('T')[0];
   const upcomingDates = sortedDates.filter(date => date >= today);
   const pastDates = sortedDates.filter(date => date < today);
@@ -93,6 +109,20 @@ const SchedulePage = () => {
         ? prev.filter(s => s !== status)
         : [...prev, status]
     );
+  };
+  
+  const handleTypeToggle = (type: string) => {
+    setSelectedType(prev => 
+      prev.includes(type)
+        ? prev.filter(t => t !== type)
+        : [...prev, type]
+    );
+  };
+
+  const getLocationName = (locationId?: number) => {
+    if (!locationId) return "";
+    const location = pickupLocations.find(loc => loc.id === locationId);
+    return location ? location.name : "";
   };
 
   return (
@@ -109,7 +139,7 @@ const SchedulePage = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Agendamentos</h1>
           <p className="text-gray-600">
-            Gerencie seus pedidos agendados e acompanhe o status de entrega.
+            Gerencie seus pedidos agendados e acompanhe o status de entrega e retirada.
           </p>
         </div>
 
@@ -140,23 +170,48 @@ const SchedulePage = () => {
                   className="mt-4"
                 >
                   <CollapsibleContent className="bg-muted/50 p-4 rounded-md">
-                    <div className="mb-2 font-medium">Filtrar por Status</div>
-                    <div className="flex flex-wrap gap-4">
-                      {statuses.map(status => (
-                        <div key={status.id} className="flex items-center space-x-2">
-                          <Checkbox 
-                            id={status.id} 
-                            checked={selectedStatus.includes(status.id)}
-                            onCheckedChange={() => handleStatusToggle(status.id)}
-                          />
-                          <label 
-                            htmlFor={status.id}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {status.label}
-                          </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <div className="mb-2 font-medium">Filtrar por Status</div>
+                        <div className="flex flex-wrap gap-4">
+                          {statuses.map(status => (
+                            <div key={status.id} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={status.id} 
+                                checked={selectedStatus.includes(status.id)}
+                                onCheckedChange={() => handleStatusToggle(status.id)}
+                              />
+                              <label 
+                                htmlFor={status.id}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                {status.label}
+                              </label>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      </div>
+                      
+                      <div>
+                        <div className="mb-2 font-medium">Filtrar por Tipo</div>
+                        <div className="flex flex-wrap gap-4">
+                          {types.map(type => (
+                            <div key={type.id} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={type.id} 
+                                checked={selectedType.includes(type.id)}
+                                onCheckedChange={() => handleTypeToggle(type.id)}
+                              />
+                              <label 
+                                htmlFor={type.id}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                {type.label}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
@@ -176,31 +231,53 @@ const SchedulePage = () => {
                             })}
                           </h3>
                           <div className="grid gap-4 md:grid-cols-2">
-                            {groupedItems[dateKey].map((item, index) => (
-                              <Card key={index} className="overflow-hidden">
-                                <CardHeader className="pb-2">
-                                  <CardTitle>{item.product.name}</CardTitle>
-                                  <CardDescription>
-                                    {item.quantity} unidades
-                                  </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                  <ScheduleStatus 
-                                    status={getRandomStatus(index) as any}
-                                    scheduledDate={item.scheduleInfo?.date || new Date()}
-                                    estimatedDeliveryTime={item.scheduleInfo?.time}
-                                  />
-                                </CardContent>
-                                <CardFooter className="bg-muted/10 border-t flex justify-between">
-                                  <div className="text-sm">
-                                    <span className="font-medium">Total:</span> R$ {(item.product.price * item.quantity).toFixed(2)}
-                                  </div>
-                                  <Button variant="outline" size="sm">
-                                    Detalhes
-                                  </Button>
-                                </CardFooter>
-                              </Card>
-                            ))}
+                            {groupedItems[dateKey].map((item, index) => {
+                              const isPickup = item.scheduleInfo?.isPickup;
+                              const locationId = item.scheduleInfo?.locationId;
+                              
+                              return (
+                                <Card key={index} className="overflow-hidden">
+                                  <CardHeader className="pb-2">
+                                    <div className="flex justify-between">
+                                      <CardTitle>{item.product.name}</CardTitle>
+                                      <Badge variant={isPickup ? "outline" : "default"} className={isPickup ? "border-amber-500 text-amber-600" : ""}>
+                                        {isPickup ? "Retirada" : "Entrega"}
+                                      </Badge>
+                                    </div>
+                                    <CardDescription>
+                                      {item.quantity} unidades
+                                    </CardDescription>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <ScheduleStatus 
+                                      status={getRandomStatus(index, !!isPickup) as any}
+                                      scheduledDate={item.scheduleInfo?.date || new Date()}
+                                      estimatedDeliveryTime={item.scheduleInfo?.time}
+                                    />
+                                    
+                                    {isPickup && locationId && (
+                                      <div className="mt-3 flex items-start text-sm">
+                                        <MapPin className="h-4 w-4 text-muted-foreground mr-2 mt-0.5" />
+                                        <div>
+                                          <p className="font-medium">{getLocationName(locationId)}</p>
+                                          <p className="text-muted-foreground">
+                                            {pickupLocations.find(loc => loc.id === locationId)?.address}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </CardContent>
+                                  <CardFooter className="bg-muted/10 border-t flex justify-between">
+                                    <div className="text-sm">
+                                      <span className="font-medium">Total:</span> R$ {(item.product.price * item.quantity).toFixed(2)}
+                                    </div>
+                                    <Button variant="outline" size="sm">
+                                      Detalhes
+                                    </Button>
+                                  </CardFooter>
+                                </Card>
+                              );
+                            })}
                           </div>
                         </div>
                       ))}
@@ -306,11 +383,16 @@ const SchedulePage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ScheduleDelivery 
-                onSchedule={(date, time, note) => {
-                  // Schedule all cart items
+              <SchedulePickup 
+                onSchedule={(date, time, note, locationId, isPickup) => {
                   cartItems.forEach(item => {
-                    updateScheduleInfo(item.product.id, { date, time, note });
+                    updateScheduleInfo(item.product.id, { 
+                      date, 
+                      time, 
+                      note,
+                      locationId,
+                      isPickup
+                    });
                   });
                 }}
                 currentQuantity={totalItems}

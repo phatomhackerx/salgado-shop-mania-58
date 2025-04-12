@@ -2,10 +2,17 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/hooks/use-cart";
-import { CalendarClock, ChevronRight, Clock, MapPin } from "lucide-react";
+import { CalendarClock, ChevronRight, Clock, MapPin, Building, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
+// Define store locations (in a real app, this should come from API/database)
+const pickupLocations = [
+  { id: 1, name: "Loja Centro", address: "Rua Principal, 123 - Centro" },
+  { id: 2, name: "Loja Norte", address: "Av. Norte, 456 - Bairro Norte" },
+  { id: 3, name: "Loja Sul", address: "Rua Sul, 789 - Bairro Sul" },
+];
 
 export const SchedulePreview = () => {
   const { scheduledItems } = useCart();
@@ -15,6 +22,8 @@ export const SchedulePreview = () => {
     products: string[];
     totalItems: number;
     note?: string;
+    locationId?: number;
+    isPickup?: boolean;
   } | null>(null);
 
   useEffect(() => {
@@ -34,7 +43,9 @@ export const SchedulePreview = () => {
         time: next.scheduleInfo.time,
         products: [next.product.name],
         totalItems: next.quantity,
-        note: next.scheduleInfo.note
+        note: next.scheduleInfo.note,
+        locationId: next.scheduleInfo.locationId,
+        isPickup: next.scheduleInfo.isPickup
       });
     }
   }, [scheduledItems]);
@@ -54,12 +65,21 @@ export const SchedulePreview = () => {
     month: 'long'
   });
   
+  // Find location details if it's a pickup
+  const location = nextDelivery.locationId 
+    ? pickupLocations.find(loc => loc.id === nextDelivery.locationId)
+    : null;
+    
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow border-l-4 border-l-primary overflow-hidden bg-white animate-fade-in">
       <CardHeader className="pb-2 bg-primary/5">
         <CardTitle className="text-lg flex items-center">
-          <CalendarClock className="mr-2 h-5 w-5 text-primary" />
-          Próxima Entrega Agendada
+          {nextDelivery.isPickup ? (
+            <Store className="mr-2 h-5 w-5 text-primary" />
+          ) : (
+            <CalendarClock className="mr-2 h-5 w-5 text-primary" />
+          )}
+          {nextDelivery.isPickup ? "Próxima Retirada Agendada" : "Próxima Entrega Agendada"}
           {isToday && <Badge className="ml-2 bg-accent animate-pulse-soft">Hoje</Badge>}
         </CardTitle>
       </CardHeader>
@@ -80,6 +100,16 @@ export const SchedulePreview = () => {
                 <p className="font-medium">{nextDelivery.time}</p>
               </div>
             </div>
+            {nextDelivery.isPickup && location && (
+              <div className="flex items-start">
+                <Building className="h-5 w-5 text-primary mr-2 mt-0.5" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Local de Retirada</p>
+                  <p className="font-medium">{location.name}</p>
+                  <p className="text-xs text-muted-foreground">{location.address}</p>
+                </div>
+              </div>
+            )}
           </div>
           <div className="space-y-3">
             <div className="flex items-start">

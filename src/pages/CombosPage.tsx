@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
-import { CalendarClock, ShoppingCart } from "lucide-react";
+import { CalendarClock, ShoppingCart, MapPin, Store } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -15,7 +14,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
+import { SchedulePickup } from "@/components/SchedulePickup";
 
 // Define combo products
 const combos = [
@@ -28,6 +29,7 @@ const combos = [
     originalPrice: 199.9,
     quantity: 100,
     popular: true,
+    category: "Festas"
   },
   {
     id: 2,
@@ -38,6 +40,7 @@ const combos = [
     originalPrice: 349.9,
     quantity: 200,
     popular: false,
+    category: "Festas"
   },
   {
     id: 3,
@@ -48,6 +51,7 @@ const combos = [
     originalPrice: 499.9,
     quantity: 300,
     popular: false,
+    category: "Festas"
   },
   {
     id: 4,
@@ -58,6 +62,7 @@ const combos = [
     originalPrice: 499.9,
     quantity: 200,
     popular: true,
+    category: "Premium"
   },
   {
     id: 5,
@@ -68,6 +73,7 @@ const combos = [
     originalPrice: 899.9,
     quantity: 500,
     popular: false,
+    category: "Corporativo"
   },
   {
     id: 6,
@@ -78,12 +84,26 @@ const combos = [
     originalPrice: 369.9,
     quantity: 150,
     popular: false,
+    category: "Premium"
   },
+];
+
+const comboCategories = [
+  { id: "todos", name: "Todos" },
+  { id: "Festas", name: "Festas" },
+  { id: "Premium", name: "Premium" },
+  { id: "Corporativo", name: "Corporativo" },
 ];
 
 const CombosPage = () => {
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, updateScheduleInfo } = useCart();
+  const [selectedCombo, setSelectedCombo] = useState<null | typeof combos[0]>(null);
+  const [selectedCategory, setSelectedCategory] = useState("todos");
+  
+  const filteredCombos = selectedCategory === "todos" 
+    ? combos 
+    : combos.filter(combo => combo.category === selectedCategory);
   
   const handleAddToCart = (combo: typeof combos[0]) => {
     // Create a product-like object from the combo
@@ -97,14 +117,45 @@ const CombosPage = () => {
     };
     
     addToCart(comboAsProduct, 1);
+    setSelectedCombo(combo);
+    
     toast({
       title: "Combo adicionado!",
       description: `${combo.name} foi adicionado ao carrinho.`,
     });
   };
   
-  const handleScheduleClick = () => {
-    navigate("/agendamento");
+  const handleSchedule = (date: Date, time: string, note: string, locationId?: number, isPickup?: boolean) => {
+    if (selectedCombo) {
+      const comboAsProduct = {
+        id: selectedCombo.id + 1000,
+        name: selectedCombo.name,
+        price: selectedCombo.price,
+        image: selectedCombo.image,
+        category: "Combos",
+        description: selectedCombo.description,
+      };
+      
+      // First add to cart if not already there
+      addToCart(comboAsProduct, 1);
+      
+      // Then update with schedule info
+      updateScheduleInfo(comboAsProduct.id, { 
+        date, 
+        time, 
+        note,
+        locationId,
+        isPickup
+      });
+      
+      toast({
+        title: isPickup ? "Retirada agendada!" : "Entrega agendada!",
+        description: `${selectedCombo.name} foi agendado para ${date.toLocaleDateString()} às ${time}.`,
+      });
+      
+      // Navigate to schedule page to see all scheduled items
+      navigate("/agendamento");
+    }
   };
   
   return (
@@ -131,17 +182,28 @@ const CombosPage = () => {
             <div className="md:w-2/3 mb-6 md:mb-0 md:pr-8">
               <h2 className="text-3xl font-bold mb-4">Grandes Eventos?</h2>
               <p className="text-lg mb-6 opacity-90">
-                Para eventos corporativos ou grandes festas, oferecemos um serviço personalizado 
-                de agendamento. Combine exatamente o que você precisa!
+                Para eventos corporativos ou grandes festas, oferecemos serviço personalizado.
+                Você pode escolher entre agendar uma entrega ou retirar em uma de nossas lojas!
               </p>
-              <Button 
-                size="lg" 
-                onClick={handleScheduleClick}
-                className="bg-white text-primary hover:bg-gray-100"
-              >
-                <CalendarClock className="mr-2 h-5 w-5" />
-                Agendar Evento Especial
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button 
+                  size="lg" 
+                  onClick={() => navigate("/agendamento")}
+                  className="bg-white text-primary hover:bg-gray-100"
+                >
+                  <CalendarClock className="mr-2 h-5 w-5" />
+                  Agendar Entrega
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  onClick={() => navigate("/agendamento")}
+                  className="bg-primary/20 text-white border-white hover:bg-primary/30"
+                >
+                  <Store className="mr-2 h-5 w-5" />
+                  Retirar na Loja
+                </Button>
+              </div>
             </div>
             <div className="md:w-1/3 flex justify-center">
               <div className="w-40 h-40 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
@@ -154,9 +216,28 @@ const CombosPage = () => {
           </div>
         </div>
         
+        {/* Filter tabs */}
+        <Tabs defaultValue="todos" value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
+          <TabsList className="mb-6">
+            {comboCategories.map(cat => (
+              <TabsTrigger key={cat.id} value={cat.id}>{cat.name}</TabsTrigger>
+            ))}
+          </TabsList>
+          
+          <TabsContent value="todos" className="mt-0">
+            {/* All categories content is shown through filteredCombos */}
+          </TabsContent>
+          
+          {comboCategories.slice(1).map(cat => (
+            <TabsContent key={cat.id} value={cat.id} className="mt-0">
+              {/* Category-specific content is shown through filteredCombos */}
+            </TabsContent>
+          ))}
+        </Tabs>
+        
         {/* Combos grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {combos.map((combo) => (
+          {filteredCombos.map((combo) => (
             <Card key={combo.id} className="overflow-hidden flex flex-col">
               <div className="h-40 bg-gray-100 relative">
                 <img 
@@ -169,6 +250,9 @@ const CombosPage = () => {
                     Mais Vendido
                   </Badge>
                 )}
+                <Badge className="absolute top-3 right-3 bg-secondary">
+                  {combo.category}
+                </Badge>
               </div>
               <CardHeader>
                 <CardTitle>{combo.name}</CardTitle>
@@ -190,20 +274,33 @@ const CombosPage = () => {
                   Economize R$ {(combo.originalPrice - combo.price).toFixed(2)}
                 </div>
               </CardContent>
-              <CardFooter className="flex gap-2">
-                <Button 
-                  className="flex-grow"
-                  onClick={() => handleAddToCart(combo)}
-                >
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  Adicionar
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={handleScheduleClick}
-                >
-                  Agendar
-                </Button>
+              <CardFooter className="flex gap-2 flex-col">
+                <div className="flex gap-2 w-full">
+                  <Button 
+                    className="flex-grow"
+                    onClick={() => handleAddToCart(combo)}
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Adicionar
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setSelectedCombo(combo)}
+                  >
+                    <CalendarClock className="mr-2 h-4 w-4" />
+                    Agendar
+                  </Button>
+                </div>
+                
+                {selectedCombo?.id === combo.id && (
+                  <div className="w-full mt-2">
+                    <SchedulePickup
+                      onSchedule={handleSchedule}
+                      minimumQuantity={1}
+                      currentQuantity={combo.quantity}
+                    />
+                  </div>
+                )}
               </CardFooter>
             </Card>
           ))}
@@ -287,14 +384,26 @@ const CombosPage = () => {
         </div>
         
         {/* CTA */}
-        <div className="text-center">
-          <Button 
-            size="lg"
-            onClick={handleScheduleClick}
-          >
-            <CalendarClock className="mr-2 h-5 w-5" />
-            Agendar seu Evento Agora
-          </Button>
+        <div className="text-center mb-8">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button 
+              size="lg"
+              onClick={() => navigate("/agendamento")}
+              className="gap-2"
+            >
+              <CalendarClock className="h-5 w-5" />
+              Agendar Entrega para Evento
+            </Button>
+            <Button 
+              size="lg"
+              variant="outline"
+              onClick={() => navigate("/agendamento")}
+              className="gap-2"
+            >
+              <MapPin className="h-5 w-5" />
+              Agendar Retirada na Loja
+            </Button>
+          </div>
         </div>
       </main>
       <Footer />
