@@ -1,4 +1,10 @@
 
+export type Category = {
+  name: string;
+  slug: string;
+  icon: string;
+};
+
 export const categories = [
   {
     name: "Coxinhas",
