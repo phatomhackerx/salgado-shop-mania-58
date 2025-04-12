@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { products, categories } from "@/data/mock-data";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, SlidersHorizontal, Grid, List, SortAsc, SortDesc } from "lucide-react";
+import { Search, Filter, SlidersHorizontal, Grid, List, SortAsc, SortDesc, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,7 +24,6 @@ const ProductsPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const isMobile = useIsMobile();
 
-  // Filter products based on search term and selected category
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           product.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -33,7 +31,6 @@ const ProductsPage = () => {
     return matchesSearch && matchesCategory;
   });
 
-  // Sort products based on selected sort mode
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortMode) {
       case "name":
@@ -44,11 +41,10 @@ const ProductsPage = () => {
         return b.price - a.price;
       case "popular":
       default:
-        return Math.random() - 0.5; // Random for demo purposes
+        return Math.random() - 0.5;
     }
   });
 
-  // Reset filters when navigating away and back
   useEffect(() => {
     return () => {
       setSearchTerm("");
@@ -65,7 +61,6 @@ const ProductsPage = () => {
         <div className="flex flex-col gap-4">
           <h1 className="text-3xl font-bold">Nossos Salgados</h1>
           
-          {/* Mobile filters toggle */}
           {isMobile && (
             <Button 
               variant="outline" 
@@ -80,7 +75,6 @@ const ProductsPage = () => {
             </Button>
           )}
           
-          {/* Filters and search - hidden on mobile unless toggled */}
           <div className={`${isMobile && !showFilters ? 'hidden' : 'block'} space-y-4`}>
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
@@ -94,7 +88,6 @@ const ProductsPage = () => {
               </div>
               
               <div className="flex gap-2">
-                {/* Sort dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="gap-2">
@@ -121,7 +114,6 @@ const ProductsPage = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
                 
-                {/* View mode toggle - hide on mobile */}
                 {!isMobile && (
                   <div className="flex border rounded-md overflow-hidden">
                     <Button
@@ -145,7 +137,6 @@ const ProductsPage = () => {
               </div>
             </div>
             
-            {/* Categories */}
             <div className="flex flex-wrap gap-2 pb-2 overflow-x-auto">
               <button
                 className={`px-4 py-2 rounded-full text-sm whitespace-nowrap ${
@@ -174,7 +165,6 @@ const ProductsPage = () => {
             <Separator />
           </div>
           
-          {/* Products count */}
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-500">
               {filteredProducts.length} {filteredProducts.length === 1 ? 'produto' : 'produtos'} encontrados
@@ -186,7 +176,6 @@ const ProductsPage = () => {
             )}
           </div>
           
-          {/* Products grid or list */}
           {sortedProducts.length > 0 ? (
             viewMode === "grid" ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
