@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/hooks/use-cart";
@@ -6,13 +5,10 @@ import { CalendarClock, ChevronRight, Clock, MapPin, Building, Store } from "luc
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { pickupLocations } from "@/components/schedule/LocationSelector";
 
-// Define store locations (in a real app, this should come from API/database)
-const pickupLocations = [
-  { id: 1, name: "Loja Centro", address: "Rua Principal, 123 - Centro" },
-  { id: 2, name: "Loja Norte", address: "Av. Norte, 456 - Bairro Norte" },
-  { id: 3, name: "Loja Sul", address: "Rua Sul, 789 - Bairro Sul" },
-];
+// Add the missing icon import
+import { Calendar, ShoppingBag } from "lucide-react";
 
 export const SchedulePreview = () => {
   const { scheduledItems } = useCart();
@@ -145,6 +141,3 @@ export const SchedulePreview = () => {
     </Card>
   );
 };
-
-// Add the missing icon import
-import { Calendar, ShoppingBag } from "lucide-react";
