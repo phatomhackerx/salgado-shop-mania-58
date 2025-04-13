@@ -25,6 +25,7 @@ import RelatoriosPage from "./pages/admin/RelatoriosPage";
 import ColaboradoresPage from "./pages/admin/ColaboradoresPage";
 import FornecedoresPage from "./pages/admin/FornecedoresPage";
 import ConfiguracoesPage from "./pages/admin/ConfiguracoesPage";
+import EntregadoresPage from "./pages/admin/EntregadoresPage";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="agendamentos" element={<AgendamentosPage />} />
               <Route path="relatorios" element={<RelatoriosPage />} />
               <Route path="colaboradores" element={<ColaboradoresPage />} />
+              <Route path="entregadores" element={<EntregadoresPage />} />
               <Route path="fornecedores" element={<FornecedoresPage />} />
               <Route path="configuracoes" element={<ConfiguracoesPage />} />
             </Route>

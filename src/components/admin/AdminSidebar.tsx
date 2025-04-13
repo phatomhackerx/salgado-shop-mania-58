@@ -12,7 +12,8 @@ import {
   Briefcase,
   Truck,
   UserCog,
-  ChevronRight
+  ChevronRight,
+  Bike
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -62,6 +63,11 @@ export const AdminSidebar = ({ open, onOpenChange }: AdminSidebarProps) => {
       title: "Colaboradores",
       href: "/admin/colaboradores",
       icon: UserCog
+    },
+    {
+      title: "Entregadores",
+      href: "/admin/entregadores",
+      icon: Bike
     },
     {
       title: "Fornecedores",
