@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
@@ -14,14 +13,12 @@ import {
 import { TabsContent } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 
-// Import the extracted components
 import { LocationSelector } from "./schedule/LocationSelector";
 import { DateSelector } from "./schedule/DateSelector";
 import { TimeSelector } from "./schedule/TimeSelector";
 import { ScheduleSummary } from "./schedule/ScheduleSummary";
 import { DeliveryPickupTabs } from "./schedule/DeliveryPickupTabs";
 
-// Re-export the location array for backward compatibility
 export { pickupLocations } from "./schedule/LocationSelector";
 
 export interface ScheduleCoreProps {
@@ -69,7 +66,6 @@ export const ScheduleCore = ({
   };
 
   const handleNextStep = () => {
-    // Validation for each step
     if (step === 1 && scheduleType === "delivery" && !date) {
       toast({
         title: "Selecione uma data",
@@ -143,15 +139,12 @@ export const ScheduleCore = ({
     }
   };
 
-  // Calculate the minimum date (next day)
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
 
-  // Calculate the maximum date (30 days from now)
   const maxDate = new Date();
   maxDate.setDate(maxDate.getDate() + 30);
 
-  // Disable weekends for delivery, but allow for pickup
   const isDateDisabled = (date: Date) => {
     const day = date.getDay();
     const isWeekend = day === 0 || day === 6;
@@ -160,11 +153,9 @@ export const ScheduleCore = ({
       return date < minDate || date > maxDate || isWeekend;
     }
     
-    // For pickup, allow weekends but still respect min and max dates
     return date < minDate || date > maxDate;
   };
 
-  // Render dialog content based on current step
   const renderStepContent = () => {
     switch(step) {
       case 1:
@@ -193,9 +184,7 @@ export const ScheduleCore = ({
     }
   };
 
-  // Render the first step (delivery type selection, pickup location, and date)
   const renderStepOne = () => {
-    // Both delivery and pickup are allowed
     if (allowPickup && allowDelivery) {
       return (
         <DeliveryPickupTabs
@@ -234,7 +223,6 @@ export const ScheduleCore = ({
       );
     }
     
-    // Only delivery is allowed
     if (!allowPickup && allowDelivery) {
       return (
         <DateSelector
@@ -249,7 +237,6 @@ export const ScheduleCore = ({
       );
     }
     
-    // Only pickup is allowed
     if (allowPickup && !allowDelivery) {
       return (
         <div className="space-y-4">
@@ -312,7 +299,6 @@ export const ScheduleCore = ({
           {renderStepContent()}
         </div>
         
-        {/* Navigation Buttons */}
         <DialogFooter className="flex space-x-2 justify-between sm:justify-between">
           <Button variant="outline" onClick={handlePrevStep}>
             {step === 1 ? "Cancelar" : "Voltar"}
