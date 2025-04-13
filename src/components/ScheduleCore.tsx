@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
@@ -13,7 +14,7 @@ import {
 import { TabsContent } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 
-import { LocationSelector } from "./schedule/LocationSelector";
+import { LocationSelector, pickupLocations } from "./schedule/LocationSelector";
 import { DateSelector } from "./schedule/DateSelector";
 import { TimeSelector } from "./schedule/TimeSelector";
 import { ScheduleSummary } from "./schedule/ScheduleSummary";
