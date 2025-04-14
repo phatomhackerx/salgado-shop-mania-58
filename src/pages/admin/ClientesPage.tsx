@@ -1,38 +1,12 @@
-
 import { useState } from "react";
 import { 
   Users, 
-  Search, 
-  Filter, 
-  Plus, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  ArrowUpDown,
   UserPlus,
   UserCheck,
   ShoppingBag
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue, 
-} from "@/components/ui/select";
 import {
   Pagination,
   PaginationContent,
@@ -42,7 +16,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CustomerStatsCard } from "@/components/admin/clientes/CustomerStatsCard";
+import { CustomerSearchFilters } from "@/components/admin/clientes/CustomerSearchFilters";
+import { CustomersTable } from "@/components/admin/clientes/CustomersTable";
 
 export const ClientesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -188,15 +164,6 @@ export const ClientesPage = () => {
     newThisMonth: 3
   };
   
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase();
-  };
-  
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -209,71 +176,42 @@ export const ClientesPage = () => {
       
       {/* Customer Statistics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <Users className="h-8 w-8 text-primary mb-2" />
-              <p className="text-sm font-medium text-gray-500">Total de Clientes</p>
-              <h3 className="text-2xl font-bold">{customerStats.total}</h3>
-            </div>
-          </CardContent>
-        </Card>
+        <CustomerStatsCard
+          title="Total de Clientes"
+          value={customerStats.total}
+          icon={Users}
+          iconColor="text-primary"
+        />
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <UserCheck className="h-8 w-8 text-green-500 mb-2" />
-              <p className="text-sm font-medium text-gray-500">Clientes Ativos</p>
-              <h3 className="text-2xl font-bold">{customerStats.active}</h3>
-            </div>
-          </CardContent>
-        </Card>
+        <CustomerStatsCard
+          title="Clientes Ativos"
+          value={customerStats.active}
+          icon={UserCheck}
+          iconColor="text-green-500"
+        />
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <ShoppingBag className="h-8 w-8 text-blue-500 mb-2" />
-              <p className="text-sm font-medium text-gray-500">Clientes Inativos</p>
-              <h3 className="text-2xl font-bold">{customerStats.inactive}</h3>
-            </div>
-          </CardContent>
-        </Card>
+        <CustomerStatsCard
+          title="Clientes Inativos"
+          value={customerStats.inactive}
+          icon={Users}
+          iconColor="text-blue-500"
+        />
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <UserPlus className="h-8 w-8 text-amber-500 mb-2" />
-              <p className="text-sm font-medium text-gray-500">Novos (Este Mês)</p>
-              <h3 className="text-2xl font-bold">{customerStats.newThisMonth}</h3>
-            </div>
-          </CardContent>
-        </Card>
+        <CustomerStatsCard
+          title="Novos (Este Mês)"
+          value={customerStats.newThisMonth}
+          icon={UserPlus}
+          iconColor="text-amber-500"
+        />
       </div>
       
       {/* Filter and search */}
-      <div className="flex flex-col gap-4 md:flex-row">
-        <div className="flex-1 relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input
-            type="search"
-            placeholder="Buscar clientes..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full md:w-[180px]">
-            <Filter className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todos os status</SelectItem>
-            <SelectItem value="Ativo">Ativo</SelectItem>
-            <SelectItem value="Inativo">Inativo</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <CustomerSearchFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+      />
       
       {/* Customers table */}
       <Card>
@@ -281,76 +219,7 @@ export const ClientesPage = () => {
           <CardTitle className="text-lg">Lista de Clientes</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">ID</TableHead>
-                <TableHead>
-                  <Button variant="ghost" className="p-0 h-auto font-medium">
-                    Cliente <ArrowUpDown className="ml-1 h-3 w-3" />
-                  </Button>
-                </TableHead>
-                <TableHead>Contato</TableHead>
-                <TableHead>Endereço</TableHead>
-                <TableHead>Compras</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCustomers.map((customer) => (
-                <TableRow key={customer.id}>
-                  <TableCell>{customer.id}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">{customer.name}</div>
-                        <div className="text-sm text-gray-500">Cliente desde {customer.since}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-1 text-sm">
-                        <Mail className="h-3 w-3 text-gray-500" />
-                        <span>{customer.email}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-sm">
-                        <Phone className="h-3 w-3 text-gray-500" />
-                        <span>{customer.phone}</span>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 text-sm">
-                      <MapPin className="h-3 w-3 text-gray-500 shrink-0" />
-                      <span className="truncate max-w-[200px]">{customer.address}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      <div>{customer.orders} pedidos</div>
-                      <div className="text-gray-500">Total: {customer.totalSpent}</div>
-                      <div className="text-xs text-gray-500">Último: {customer.lastOrder}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={customer.status === "Ativo" ? "bg-green-100 text-green-800 hover:bg-green-100" : "bg-gray-100 text-gray-800 hover:bg-gray-100"}>
-                      {customer.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
-                      Detalhes
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <CustomersTable customers={filteredCustomers} />
         </CardContent>
       </Card>
       

@@ -1,37 +1,13 @@
-
 import { useState } from "react";
 import { 
-  Calendar, 
-  Clock, 
-  Search, 
-  Filter, 
-  Plus, 
-  ArrowUpDown,
-  CalendarDays,
-  AlarmClock,
+  CalendarDays, 
   CheckCircle,
+  AlarmClock,
   Package,
-  Users
+  Plus
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue, 
-} from "@/components/ui/select";
 import {
   Pagination,
   PaginationContent,
@@ -41,8 +17,11 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/hooks/use-cart";
+import { ScheduleStatsCard } from "@/components/admin/agendamentos/ScheduleStatsCard";
+import { WeekCalendarView } from "@/components/admin/agendamentos/WeekCalendarView";
+import { ScheduleSearchFilters } from "@/components/admin/agendamentos/ScheduleSearchFilters";
+import { SchedulesTable } from "@/components/admin/agendamentos/SchedulesTable";
 
 export const AgendamentosPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -149,27 +128,6 @@ export const AgendamentosPage = () => {
     canceled: mockScheduledItems.filter(s => s.status === "Cancelado").length,
   };
   
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "Confirmado":
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-          <CheckCircle className="mr-1 h-3 w-3" />
-          Confirmado
-        </Badge>;
-      case "Pendente":
-        return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-          <Clock className="mr-1 h-3 w-3" />
-          Pendente
-        </Badge>;
-      case "Cancelado":
-        return <Badge variant="destructive">
-          Cancelado
-        </Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
-  
   // Upcoming days for the calendar view
   const currentDate = new Date();
   const upcomingDays = Array.from({ length: 5 }, (_, i) => {
@@ -183,11 +141,6 @@ export const AgendamentosPage = () => {
     };
   });
   
-  // Today's scheduled items
-  const todaySchedules = mockScheduledItems.filter(item => 
-    item.date === new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '/')
-  );
-  
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -200,117 +153,48 @@ export const AgendamentosPage = () => {
       
       {/* Schedule Statistics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <CalendarDays className="h-8 w-8 text-primary mb-2" />
-              <p className="text-sm font-medium text-gray-500">Total</p>
-              <h3 className="text-2xl font-bold">{scheduleStats.total}</h3>
-            </div>
-          </CardContent>
-        </Card>
+        <ScheduleStatsCard
+          title="Total"
+          value={scheduleStats.total}
+          icon={CalendarDays}
+          iconColor="text-primary"
+        />
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <CheckCircle className="h-8 w-8 text-green-500 mb-2" />
-              <p className="text-sm font-medium text-gray-500">Confirmados</p>
-              <h3 className="text-2xl font-bold">{scheduleStats.confirmed}</h3>
-            </div>
-          </CardContent>
-        </Card>
+        <ScheduleStatsCard
+          title="Confirmados"
+          value={scheduleStats.confirmed}
+          icon={CheckCircle}
+          iconColor="text-green-500"
+        />
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <AlarmClock className="h-8 w-8 text-amber-500 mb-2" />
-              <p className="text-sm font-medium text-gray-500">Pendentes</p>
-              <h3 className="text-2xl font-bold">{scheduleStats.pending}</h3>
-            </div>
-          </CardContent>
-        </Card>
+        <ScheduleStatsCard
+          title="Pendentes"
+          value={scheduleStats.pending}
+          icon={AlarmClock}
+          iconColor="text-amber-500"
+        />
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <Package className="h-8 w-8 text-red-500 mb-2" />
-              <p className="text-sm font-medium text-gray-500">Cancelados</p>
-              <h3 className="text-2xl font-bold">{scheduleStats.canceled}</h3>
-            </div>
-          </CardContent>
-        </Card>
+        <ScheduleStatsCard
+          title="Cancelados"
+          value={scheduleStats.canceled}
+          icon={Package}
+          iconColor="text-red-500"
+        />
       </div>
       
       {/* Calendar preview */}
-      <Card>
-        <CardHeader className="px-6 py-4">
-          <CardTitle className="text-lg">Visão da Semana</CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="flex flex-wrap gap-2 justify-between">
-            {upcomingDays.map((day, index) => (
-              <div 
-                key={index} 
-                className={`flex flex-col items-center p-4 rounded-lg border ${index === 0 ? 'bg-primary/10 border-primary' : ''}`}
-                style={{ minWidth: '120px' }}
-              >
-                <span className="text-sm font-medium text-gray-500">{day.dayName}</span>
-                <span className="text-3xl font-bold mt-1">{day.dayNumber}</span>
-                <span className="text-sm text-gray-500">{day.month}</span>
-                
-                <div className="mt-3 w-full">
-                  {mockScheduledItems
-                    .filter(item => item.date === day.fullDate)
-                    .slice(0, 2)
-                    .map((item, idx) => (
-                      <div key={idx} className="text-xs p-1.5 mt-1 bg-gray-100 rounded text-center truncate">
-                        {item.time} - {item.customer.split(' ')[0]}
-                      </div>
-                    ))}
-                  
-                  {mockScheduledItems.filter(item => item.date === day.fullDate).length > 2 && (
-                    <div className="text-xs text-center mt-1 text-primary">
-                      + {mockScheduledItems.filter(item => item.date === day.fullDate).length - 2} mais
-                    </div>
-                  )}
-                  
-                  {mockScheduledItems.filter(item => item.date === day.fullDate).length === 0 && (
-                    <div className="text-xs text-center mt-2 text-gray-400">
-                      Sem agendamentos
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <WeekCalendarView 
+        upcomingDays={upcomingDays} 
+        scheduledItems={mockScheduledItems}
+      />
       
       {/* Filter and search */}
-      <div className="flex flex-col gap-4 md:flex-row">
-        <div className="flex-1 relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input
-            type="search"
-            placeholder="Buscar agendamentos..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full md:w-[180px]">
-            <Filter className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todos os status</SelectItem>
-            <SelectItem value="Confirmado">Confirmado</SelectItem>
-            <SelectItem value="Pendente">Pendente</SelectItem>
-            <SelectItem value="Cancelado">Cancelado</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <ScheduleSearchFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+      />
       
       {/* Schedules table */}
       <Card>
@@ -318,54 +202,7 @@ export const AgendamentosPage = () => {
           <CardTitle className="text-lg">Lista de Agendamentos</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">ID</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Produto</TableHead>
-                <TableHead>
-                  <Button variant="ghost" className="p-0 h-auto font-medium">
-                    Data/Hora <ArrowUpDown className="ml-1 h-3 w-3" />
-                  </Button>
-                </TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredSchedules.map((schedule) => (
-                <TableRow key={schedule.id}>
-                  <TableCell>{schedule.id}</TableCell>
-                  <TableCell>
-                    <div className="font-medium">{schedule.customer}</div>
-                    <div className="text-sm text-gray-500 truncate max-w-[200px]">{schedule.address}</div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-medium">{schedule.product}</div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4 text-gray-500" />
-                      {schedule.date}
-                    </div>
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                      <Clock className="h-3 w-3" />
-                      {schedule.time}
-                    </div>
-                  </TableCell>
-                  <TableCell>{schedule.price}</TableCell>
-                  <TableCell>{getStatusBadge(schedule.status)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
-                      Detalhes
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <SchedulesTable schedules={filteredSchedules} />
         </CardContent>
       </Card>
       
