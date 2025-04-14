@@ -29,9 +29,9 @@ export const CustomerSearchFilters = ({
         />
       </div>
       <Select value={statusFilter} onValueChange={setStatusFilter}>
-        <SelectTrigger className="w-full sm:w-[180px]">
-          <Filter className="mr-2 h-4 w-4" />
-          <SelectValue placeholder="Status" />
+        <SelectTrigger className="w-full sm:w-[180px] flex items-center">
+          <Filter className="mr-2 h-4 w-4 flex-shrink-0" />
+          <SelectValue placeholder="Status" className="flex-1 truncate" />
         </SelectTrigger>
         <SelectContent className="z-50">
           <SelectItem value="todos">Todos os status</SelectItem>
