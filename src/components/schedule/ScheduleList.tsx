@@ -90,8 +90,8 @@ export const ScheduleList = ({
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <div className="flex justify-between items-center">
-        <TabsList>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <TabsList className="mb-0">
           <TabsTrigger value="upcoming">Próximas Entregas</TabsTrigger>
           <TabsTrigger value="past">Entregas Passadas</TabsTrigger>
         </TabsList>
