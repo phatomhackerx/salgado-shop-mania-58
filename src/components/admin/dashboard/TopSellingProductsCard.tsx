@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RatingStars } from "@/components/RatingStars";
 
+// Update the interface to match the actual data structure
 interface Product {
-  id: string;
+  id: number; // Changed from string to number to match the actual data
   name: string;
   price: number;
   quantity: number;

@@ -22,6 +22,9 @@ export type CartItem = {
   scheduleInfo?: ScheduleInfo;
 };
 
+// Add the ScheduledItem type that was missing
+export type ScheduledItem = CartItem;
+
 export type CartContextType = {
   cartItems: CartItem[];
   addToCart: (product: Product, quantity?: number, scheduleInfo?: ScheduleInfo) => void;

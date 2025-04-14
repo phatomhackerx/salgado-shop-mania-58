@@ -61,9 +61,9 @@ export const AdminDashboard = () => {
     { id: "PED-2342", customer: "Ana Souza", date: "14/04/2025", amount: "R$ 65,00", status: "Entregue" },
   ];
   
-  // Most sold products
+  // Most sold products - adapted to match the Product interface in TopSellingProductsCard
   const mostSoldProducts = featuredProducts.slice(0, 5).map(product => ({
-    id: product.id,
+    id: product.id, // This is already a number
     name: product.name,
     price: product.price,
     quantity: Math.floor(Math.random() * 100) + 50, // Random quantity for demo
