@@ -9,7 +9,7 @@ export const AdminLayout = () => {
   const isDesktop = !useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(isDesktop);
   
-  // Ajusta o estado do sidebar quando o tamanho da tela muda
+  // Adjust sidebar state when screen size changes
   useEffect(() => {
     setSidebarOpen(isDesktop);
   }, [isDesktop]);

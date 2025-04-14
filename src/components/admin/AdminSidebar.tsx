@@ -81,14 +81,15 @@ export const AdminSidebar = ({ open, onOpenChange }: AdminSidebarProps) => {
       {/* Overlay para fechar o sidebar em dispositivos móveis */}
       {open && (
         <div 
-          className="fixed inset-0 bg-black/20 z-10 lg:hidden" 
+          className="fixed inset-0 bg-black/20 z-20 lg:hidden" 
           onClick={() => onOpenChange(false)}
+          aria-hidden="true"
         />
       )}
       
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-20 flex flex-col border-r bg-white transition-all duration-300 lg:static",
+          "fixed inset-y-0 left-0 z-30 flex flex-col border-r bg-white transition-all duration-300 lg:static",
           open 
             ? "w-64 translate-x-0 shadow-lg lg:shadow-none" 
             : "w-[70px] -translate-x-full lg:translate-x-0"
@@ -107,6 +108,7 @@ export const AdminSidebar = ({ open, onOpenChange }: AdminSidebarProps) => {
                 size="icon"
                 className="ml-auto"
                 onClick={() => onOpenChange(false)}
+                aria-label="Minimizar menu"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
@@ -117,6 +119,7 @@ export const AdminSidebar = ({ open, onOpenChange }: AdminSidebarProps) => {
                 variant="ghost"
                 size="icon"
                 onClick={() => onOpenChange(true)}
+                aria-label="Expandir menu"
               >
                 <ChevronRight className="h-5 w-5" />
               </Button>
@@ -139,6 +142,7 @@ export const AdminSidebar = ({ open, onOpenChange }: AdminSidebarProps) => {
                           : "text-gray-700 hover:bg-gray-100",
                         !open && "justify-center px-0"
                       )}
+                      aria-current={location.pathname === item.href ? "page" : undefined}
                     >
                       <item.icon className={cn(
                         "h-5 w-5", 
@@ -170,6 +174,7 @@ export const AdminSidebar = ({ open, onOpenChange }: AdminSidebarProps) => {
                       location.pathname === "/admin/configuracoes" && "bg-primary text-white",
                       !open && "justify-center px-0"
                     )}
+                    aria-current={location.pathname === "/admin/configuracoes" ? "page" : undefined}
                   >
                     <Settings className={cn(
                       "h-5 w-5", 

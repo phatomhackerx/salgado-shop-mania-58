@@ -19,13 +19,14 @@ interface AdminHeaderProps {
 
 export const AdminHeader = ({ sidebarOpen, onSidebarOpenChange }: AdminHeaderProps) => {
   return (
-    <header className="sticky top-0 z-10 border-b bg-white px-4 py-3 flex items-center justify-between">
+    <header className="sticky top-0 z-30 border-b bg-white px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => onSidebarOpenChange(!sidebarOpen)}
           className="lg:hidden"
+          aria-label={sidebarOpen ? "Fechar menu" : "Abrir menu"}
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -34,16 +35,16 @@ export const AdminHeader = ({ sidebarOpen, onSidebarOpenChange }: AdminHeaderPro
       </div>
       
       <div className="flex items-center gap-2 sm:gap-4">
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative" aria-label="Notificações">
           <Bell className="h-5 w-5" />
           <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
         </Button>
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full" aria-label="Menu do usuário">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarImage src="https://github.com/shadcn.png" alt="Avatar do usuário" />
                 <AvatarFallback>AD</AvatarFallback>
               </Avatar>
             </Button>

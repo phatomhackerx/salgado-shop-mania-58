@@ -173,12 +173,13 @@ export const FornecedoresPage = () => {
         <h2 className="text-2xl font-bold tracking-tight">Fornecedores</h2>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Novo Fornecedor
+          <span className="hidden sm:inline">Novo Fornecedor</span>
+          <span className="sm:hidden">Novo</span>
         </Button>
       </div>
       
       {/* Supplier Statistics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col items-center text-center">
@@ -253,20 +254,20 @@ export const FornecedoresPage = () => {
         <CardHeader className="px-6 py-4">
           <CardTitle className="text-lg">Lista de Fornecedores</CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[50px]">ID</TableHead>
+                <TableHead className="w-[50px] hidden md:table-cell">ID</TableHead>
                 <TableHead>
                   <Button variant="ghost" className="p-0 h-auto font-medium">
                     Fornecedor <ArrowUpDown className="ml-1 h-3 w-3" />
                   </Button>
                 </TableHead>
-                <TableHead>Contato</TableHead>
-                <TableHead>Endereço</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Produtos</TableHead>
+                <TableHead className="hidden md:table-cell">Contato</TableHead>
+                <TableHead className="hidden lg:table-cell">Endereço</TableHead>
+                <TableHead className="hidden sm:table-cell">Categoria</TableHead>
+                <TableHead className="hidden sm:table-cell">Produtos</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -274,18 +275,25 @@ export const FornecedoresPage = () => {
             <TableBody>
               {filteredSuppliers.map((supplier) => (
                 <TableRow key={supplier.id}>
-                  <TableCell>{supplier.id}</TableCell>
+                  <TableCell className="hidden md:table-cell">{supplier.id}</TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-1">
-                      <div className="font-medium">{supplier.name}</div>
-                      <div className="text-sm text-gray-500">Contato: {supplier.contact}</div>
+                      <div className="font-medium truncate max-w-[150px] sm:max-w-[200px] md:max-w-none">
+                        {supplier.name}
+                      </div>
+                      <div className="text-sm text-gray-500 md:hidden">
+                        {supplier.contact}
+                      </div>
+                      <div className="flex items-center gap-1 text-sm sm:hidden">
+                        <Badge variant="outline">{supplier.category}</Badge>
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-1 text-sm">
                         <Mail className="h-3 w-3 text-gray-500" />
-                        <span>{supplier.email}</span>
+                        <span className="truncate max-w-[120px] lg:max-w-none">{supplier.email}</span>
                       </div>
                       <div className="flex items-center gap-1 text-sm">
                         <Phone className="h-3 w-3 text-gray-500" />
@@ -293,19 +301,19 @@ export const FornecedoresPage = () => {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden lg:table-cell">
                     <div className="flex items-center gap-1 text-sm">
                       <MapPin className="h-3 w-3 text-gray-500 shrink-0" />
-                      <span className="truncate max-w-[200px]">{supplier.address}</span>
+                      <span className="truncate max-w-[200px] xl:max-w-[300px]">{supplier.address}</span>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="outline">{supplier.category}</Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <div className="text-sm">
                       <div className="font-medium">{supplier.products}</div>
-                      <div className="text-xs text-gray-500">Última compra: {supplier.lastOrder}</div>
+                      <div className="text-xs text-gray-500 hidden md:block">Última compra: {supplier.lastOrder}</div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -315,7 +323,8 @@ export const FornecedoresPage = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm">
-                      Detalhes
+                      <span className="hidden sm:inline">Detalhes</span>
+                      <span className="sm:hidden">Ver</span>
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -328,7 +337,7 @@ export const FornecedoresPage = () => {
       {/* Pagination */}
       <Pagination>
         <PaginationContent>
-          <PaginationItem>
+          <PaginationItem className="hidden sm:inline-block">
             <PaginationPrevious href="#" />
           </PaginationItem>
           <PaginationItem>
@@ -336,15 +345,15 @@ export const FornecedoresPage = () => {
               1
             </PaginationLink>
           </PaginationItem>
-          <PaginationItem>
+          <PaginationItem className="hidden sm:inline-block">
             <PaginationLink href="#">
               2
             </PaginationLink>
           </PaginationItem>
-          <PaginationItem>
+          <PaginationItem className="hidden sm:inline-block">
             <PaginationEllipsis />
           </PaginationItem>
-          <PaginationItem>
+          <PaginationItem className="hidden sm:inline-block">
             <PaginationNext href="#" />
           </PaginationItem>
         </PaginationContent>

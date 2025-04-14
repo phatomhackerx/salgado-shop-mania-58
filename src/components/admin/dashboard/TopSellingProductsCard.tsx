@@ -4,9 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RatingStars } from "@/components/RatingStars";
 
-// Update the interface to match the actual data structure
 interface Product {
-  id: number; // Changed from string to number to match the actual data
+  id: number;
   name: string;
   price: number;
   quantity: number;
@@ -19,31 +18,33 @@ interface TopSellingProductsCardProps {
 
 export const TopSellingProductsCard = ({ products }: TopSellingProductsCardProps) => {
   return (
-    <Card className="lg:col-span-4">
+    <Card className="lg:col-span-4 w-full overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Produtos mais vendidos</CardTitle>
         <Link to="/admin/produtos" className="text-sm text-primary hover:underline">
           Ver todos
         </Link>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0 overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Produto</TableHead>
-              <TableHead>Preço</TableHead>
-              <TableHead>Vendidos</TableHead>
+              <TableHead className="w-[40%] md:w-auto">Produto</TableHead>
+              <TableHead className="hidden sm:table-cell">Preço</TableHead>
+              <TableHead className="hidden md:table-cell">Vendidos</TableHead>
               <TableHead>Avaliação</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {products.map((product) => (
               <TableRow key={product.id}>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell>
+                <TableCell className="font-medium truncate max-w-[150px] sm:max-w-none">
+                  {product.name}
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
                 </TableCell>
-                <TableCell>{product.quantity}</TableCell>
+                <TableCell className="hidden md:table-cell">{product.quantity}</TableCell>
                 <TableCell>
                   <RatingStars rating={product.rating} size="sm" />
                 </TableCell>
