@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { 
   Users, 
   UserPlus,
   UserCheck,
-  ShoppingBag
+  Users as UsersIcon,
+  PlusSquare,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -166,16 +168,17 @@ export const ClientesPage = () => {
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Clientes</h2>
         <Button>
           <UserPlus className="mr-2 h-4 w-4" />
-          Novo Cliente
+          <span className="hidden sm:inline">Novo Cliente</span>
+          <span className="sm:hidden">Novo</span>
         </Button>
       </div>
       
       {/* Customer Statistics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
         <CustomerStatsCard
           title="Total de Clientes"
           value={customerStats.total}
@@ -193,14 +196,14 @@ export const ClientesPage = () => {
         <CustomerStatsCard
           title="Clientes Inativos"
           value={customerStats.inactive}
-          icon={Users}
+          icon={UsersIcon}
           iconColor="text-blue-500"
         />
         
         <CustomerStatsCard
           title="Novos (Este Mês)"
           value={customerStats.newThisMonth}
-          icon={UserPlus}
+          icon={PlusSquare}
           iconColor="text-amber-500"
         />
       </div>
@@ -223,30 +226,36 @@ export const ClientesPage = () => {
         </CardContent>
       </Card>
       
-      {/* Pagination */}
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious href="#" />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#" isActive>
-              1
-            </PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">
-              2
-            </PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="#" />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      {/* Pagination - Made fully responsive */}
+      <div className="flex justify-center">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious href="#" />
+            </PaginationItem>
+            
+            <PaginationItem className="hidden sm:inline-block">
+              <PaginationLink href="#" isActive>
+                1
+              </PaginationLink>
+            </PaginationItem>
+            
+            <PaginationItem className="hidden sm:inline-block">
+              <PaginationLink href="#">
+                2
+              </PaginationLink>
+            </PaginationItem>
+            
+            <PaginationItem className="hidden sm:inline-block">
+              <PaginationEllipsis />
+            </PaginationItem>
+            
+            <PaginationItem>
+              <PaginationNext href="#" />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 };
